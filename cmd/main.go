@@ -1,59 +1,64 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"time"
 
+	"github.com/zacharygilliom/internal/database"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 func main() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(
-		"mongodb+srv://admin:Branstark1@production.tobvq.mongodb.net/pantry?retryWrites=true&w=majority",
-	))
+	// Establish our connection to our databse
+	client, ctx := database.ConnectDatabase()
+	// Connect to our database
+	err := client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Disconnects our connection after finishes running
 	defer client.Disconnect(ctx)
 
-	err = client.Ping(ctx, readpref.Primary())
-	if err != nil {
-		log.Fatal(err)
-	}
+	//err = client.Ping(ctx, readpref.Primary())
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	// Create our Database
+	var databaseName string = "pantry"
+	pantryDatabase := database.CreateDatabase(databaseName, client)
 
-	pantry := client.Database("pantry")
+	// Create a Collection
+	var collectionName string = "ingredients"
+	ingredientsCollection := database.CreateCollection(collectionName, pantryDatabase)
 
-	ingredientsCollection := pantry.Collection("ingredients")
-
-	ingredientsResults, err := ingredientsCollection.InsertOne(ctx, bson.D{
-		{Key: "name", Value: "flour"},
-		{Key: "kind", Value: "white"},
-	})
+	//ingredientsResults, err := ingredientsCollection.InsertOne(ctx, bson.D{
+	//{Key: "name", Value: "flour"},
+	//{Key: "kind", Value: "white"},
+	//})
 
 	results := struct {
 		name string
 		kind string
 	}{}
 
-	filter := bson.M{"kind": "white"}
-	// filter := bson.M{"name": "flour"}
-	err = ingredientsCollection.FindOne(context.Background(), filter).Decode(&results)
+	fmt.Println(results)
+
+	cursor, err := ingredientsCollection.Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
+	var ingredients []bson.M
+	if err = cursor.All(ctx, &ingredients); err != nil {
+		log.Fatal(err)
+	}
+	for _, ingredient := range ingredients {
+		fmt.Println(ingredient)
+	}
 
-	fmt.Println(ingredientsResults)
-	fmt.Println(results)
+	database.DeleteData(ingredientsCollection, ctx)
+
+	for _, ingredient := range ingredients {
+		fmt.Println(ingredient)
+	}
+
 }
