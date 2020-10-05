@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/zacharygilliom/internal/database"
@@ -21,21 +20,29 @@ func main() {
 	pantryDatabase := database.CreateDatabase(databaseName, client)
 
 	//pantryIngredient := pantryDatabase.Collection("ingredient")
-	collectionName := "ingredient"
-	pantryIngredient := database.CreateCollection(collectionName, pantryDatabase)
+	//ingredientCollection := "ingredient"
+	//pantryIngredient := database.CreateCollection(ingredientCollection, pantryDatabase)
 
-	pantryResult, err := pantryIngredient.InsertOne(ctx, bson.D{
-		{"name", "flour"},
-	})
-	if err != nil {
-		log.Fatal(err)
+	userCollection := "user"
+	pantryUser := database.CreateCollection(userCollection, pantryDatabase)
+
+	data := bson.D{
+		{"firstname", "Zach"},
+		{"lastname", "Gilliom"},
+		{"email", "zacharygilliom@gmail.com"},
 	}
-	fmt.Println(pantryResult.InsertedID)
+	database.InsertDataToCollection(pantryUser, ctx, data)
+	//pantryResult, err := pantryIngredient.InsertOne(ctx, bson.D{
+	//{"name", "flour"},
+	//})
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(pantryResult)
 
-	databases, err := client.ListDatabaseNames(ctx, bson.M{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(databases)
+}
 
+func getUserInput() string {
+	var answer string
+	return answer
 }
