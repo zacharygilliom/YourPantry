@@ -82,6 +82,5 @@ func AppSelection(choice string, collection *mongo.Collection, ctx context.Conte
 		database.ListDocuments(collection, ctx)
 		userChoice := AppMenu()
 		AppSelection(userChoice, collection, ctx)
-
 	}
 }
