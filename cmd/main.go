@@ -4,13 +4,21 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/zacharygilliom/internal/database"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type Recipe struct {
+	id                  int
+	usedIngredientCount int
+	title               string
+}
 
 func main() {
 	fmt.Println("Connection Started...")
@@ -21,29 +29,14 @@ func main() {
 	}
 	defer client.Disconnect(ctx)
 
-	//pantryDatabase := client.Database("pantry")
 	databaseName := "pantry"
 	pantryDatabase := database.NewDatabase(databaseName, client)
 
-	//pantryIngredient := pantryDatabase.Collection("ingredient")
 	ingredientCollection := "ingredient"
 	pantryIngredient := database.NewCollection(ingredientCollection, pantryDatabase)
 
-	//userCollection := "user"
-	//pantryUser := database.CreateCollection(userCollection, pantryDatabase)
-
-	//pantryResult, err := pantryIngredient.InsertOne(ctx, bson.D{
-	//	{"name", "flour"},
-	//})
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println(pantryResult.InsertedID)
 	userChoice := AppMenu()
 	AppSelection(userChoice, pantryIngredient, ctx)
-	ing := "Jam"
-
-	database.InsertDataToCollection(pantryIngredient, ctx, ing)
 }
 
 func AppMenu() string {
@@ -55,6 +48,7 @@ func AppMenu() string {
 	fmt.Println("2. Remove Ingredient")
 	fmt.Println("3. View Ingredients")
 	fmt.Println("4. Search Recipes")
+	fmt.Println("-----------------------")
 	text, _ := reader.ReadString('\n')
 	text = strings.Replace(text, "\n", "", -1)
 	return text
@@ -82,5 +76,24 @@ func AppSelection(choice string, collection *mongo.Collection, ctx context.Conte
 		database.ListDocuments(collection, ctx)
 		userChoice := AppMenu()
 		AppSelection(userChoice, collection, ctx)
+	case "4":
+		SearchIngredients()
+	}
+}
+
+func SearchIngredients() {
+	ingred := "eggs,milk,cheese"
+	resp, err := http.Get("https://api.spoonacular.com/recipes/complexSearch?apiKey=58bbec758ee847f7b331410b02c7252d&includeIngredients=" + ingred + "&number=10")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, rec := range body {
+		recString := string(rec)
+		fmt.Println(recString)
 	}
 }
