@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +14,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type RecipeList struct {
+	List []Recipe `json:"results"`
+}
+
 type Recipe struct {
-	id                  int
-	usedIngredientCount int
-	title               string
+	ID                  int    `json:"id"`
+	UsedIngredientCount int    `json:"usedIngredientCount"`
+	Title               string `json:"title"`
 }
 
 func main() {
@@ -88,12 +92,26 @@ func SearchIngredients() {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+
+	var r RecipeList
+
+	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		log.Fatal(err)
 	}
-	for _, rec := range body {
-		recString := string(rec)
-		fmt.Println(recString)
+
+	fmt.Println(r)
+
+	for _, rec := range r.List {
+		fmt.Println(rec.Title)
 	}
+	//body, err := ioutil.ReadAll(resp.Body)
+	//fmt.Println(resp)
+	//fmt.Println(string(body))
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//for _, rec := range body {
+	//	recString := string(rec)
+	//	fmt.Println(recString)
+	//}
 }
