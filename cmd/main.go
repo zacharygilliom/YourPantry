@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/zacharygilliom/internal/database"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,7 +27,8 @@ type Recipe struct {
 
 func main() {
 	fmt.Println("Connection Started...")
-	client, ctx, err := database.CreateConnection()
+	client, err := database.CreateConnection()
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +42,7 @@ func main() {
 	pantryIngredient := database.NewCollection(ingredientCollection, pantryDatabase)
 
 	userChoice := AppMenu()
-	AppSelection(userChoice, pantryIngredient, ctx)
+	AppSelection(userChoice, pantryIngredient)
 }
 
 func AppMenu() string {
@@ -52,42 +54,49 @@ func AppMenu() string {
 	fmt.Println("2. Remove Ingredient")
 	fmt.Println("3. View Ingredients")
 	fmt.Println("4. Search Recipes")
+	fmt.Println("5. Close application")
 	fmt.Println("-----------------------")
 	text, _ := reader.ReadString('\n')
 	text = strings.Replace(text, "\n", "", -1)
 	return text
 }
 
-func AppSelection(choice string, collection *mongo.Collection, ctx context.Context) {
+func AppSelection(choice string, collection *mongo.Collection) {
 	switch choice {
 	case "1":
 		fmt.Println("Please type the ingredient to add...")
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		text = strings.Replace(text, "\n", "", -1)
-		database.InsertDataToCollection(collection, ctx, text)
+		database.InsertDataToCollection(collection, text)
 		userChoice := AppMenu()
-		AppSelection(userChoice, collection, ctx)
+		AppSelection(userChoice, collection)
 	case "2":
 		fmt.Println("Please type the ingredient to remove...")
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		text = strings.Replace(text, "\n", "", -1)
-		database.RemoveManyFromCollection(collection, ctx, text)
+		database.RemoveManyFromCollection(collection, text)
 		userChoice := AppMenu()
-		AppSelection(userChoice, collection, ctx)
+		AppSelection(userChoice, collection)
 	case "3":
-		database.ListDocuments(collection, ctx)
+		database.ListDocuments(collection)
 		userChoice := AppMenu()
-		AppSelection(userChoice, collection, ctx)
+		AppSelection(userChoice, collection)
 	case "4":
-		SearchIngredients()
+		SearchIngredients(collection)
+		userChoice := AppMenu()
+		AppSelection(userChoice, collection)
+	case "5":
+		fmt.Println("Application Closed")
 	}
 }
 
-func SearchIngredients() {
-	ingred := "eggs,milk,cheese"
-	resp, err := http.Get("https://api.spoonacular.com/recipes/complexSearch?apiKey=58bbec758ee847f7b331410b02c7252d&includeIngredients=" + ingred + "&number=10")
+func SearchIngredients(collection *mongo.Collection) {
+	ingred := database.BuildIngredientString(collection)
+	ingredString := ingred.String()
+	fmt.Println(ingredString)
+	resp, err := http.Get("https://api.spoonacular.com/recipes/complexSearch?apiKey=58bbec758ee847f7b331410b02c7252d&includeIngredients=" + ingredString + "&number=10")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -104,14 +113,4 @@ func SearchIngredients() {
 	for _, rec := range r.List {
 		fmt.Println(rec.Title)
 	}
-	//body, err := ioutil.ReadAll(resp.Body)
-	//fmt.Println(resp)
-	//fmt.Println(string(body))
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//for _, rec := range body {
-	//	recString := string(rec)
-	//	fmt.Println(recString)
-	//}
 }

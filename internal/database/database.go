@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -30,13 +31,12 @@ type Ingredient struct {
 	Name string             `bson:"name, omitempty"`
 }
 
-func CreateConnection() (*mongo.Client, context.Context, error) {
+func CreateConnection() (*mongo.Client, error) {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://admin:Branstark1@production.tobvq.mongodb.net/pantry?retryWrites=true&w=majority"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	return client, ctx, err
+	return client, err
 }
 
 func NewDatabase(databaseName string, client *mongo.Client) *mongo.Database {
@@ -49,7 +49,9 @@ func NewCollection(collectionName string, database *mongo.Database) *mongo.Colle
 	return collection
 }
 
-func InsertDataToCollection(collection *mongo.Collection, ctx context.Context, data string) {
+func InsertDataToCollection(collection *mongo.Collection, data string) {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	defer ctx.Done()
 	ingredient := bson.D{
 		{"name", data},
 	}
@@ -60,7 +62,9 @@ func InsertDataToCollection(collection *mongo.Collection, ctx context.Context, d
 	fmt.Println(result.InsertedID)
 }
 
-func RemoveManyFromCollection(collection *mongo.Collection, ctx context.Context, data string) {
+func RemoveManyFromCollection(collection *mongo.Collection, data string) {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	defer ctx.Done()
 	filter := bson.D{
 		{"name", data},
 	}
@@ -77,7 +81,9 @@ func RemoveManyFromCollection(collection *mongo.Collection, ctx context.Context,
 	fmt.Println("")
 }
 
-func ListDocuments(collection *mongo.Collection, ctx context.Context) {
+func ListDocuments(collection *mongo.Collection) {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	defer ctx.Done()
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
@@ -92,4 +98,26 @@ func ListDocuments(collection *mongo.Collection, ctx context.Context) {
 			}
 		}
 	}
+}
+
+func BuildIngredientString(collection *mongo.Collection) strings.Builder {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	defer ctx.Done()
+	cursor, err := collection.Find(ctx, bson.M{})
+	var ings strings.Builder
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		for cursor.Next(ctx) {
+			var result Ingredient
+			err := cursor.Decode(&result)
+			if err != nil {
+				log.Fatal(err)
+				return ings
+			} else {
+				ings.WriteString("," + result.Name)
+			}
+		}
+	}
+	return ings
 }
