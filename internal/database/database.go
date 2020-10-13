@@ -100,7 +100,7 @@ func ListDocuments(collection *mongo.Collection) {
 	}
 }
 
-func BuildIngredientString(collection *mongo.Collection) strings.Builder {
+func BuildIngredientString(collection *mongo.Collection) string {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	cursor, err := collection.Find(ctx, bson.M{})
@@ -113,11 +113,11 @@ func BuildIngredientString(collection *mongo.Collection) strings.Builder {
 			err := cursor.Decode(&result)
 			if err != nil {
 				log.Fatal(err)
-				return ings
 			} else {
-				ings.WriteString("," + result.Name)
+				ings.WriteString(result.Name + "&")
 			}
 		}
 	}
-	return ings
+	ingsSlice := ings.String()[:len(ings.String())-1]
+	return ingsSlice
 }

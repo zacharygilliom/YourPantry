@@ -94,9 +94,7 @@ func AppSelection(choice string, collection *mongo.Collection) {
 
 func SearchIngredients(collection *mongo.Collection) {
 	ingred := database.BuildIngredientString(collection)
-	ingredString := ingred.String()
-	fmt.Println(ingredString)
-	resp, err := http.Get("https://api.spoonacular.com/recipes/complexSearch?apiKey=58bbec758ee847f7b331410b02c7252d&includeIngredients=" + ingredString + "&number=10")
+	resp, err := http.Get("https://api.spoonacular.com/recipes/complexSearch?apiKey=58bbec758ee847f7b331410b02c7252d&includeIngredients=" + ingred + "&number=10")
 	if err != nil {
 		log.Fatal(err)
 	}
