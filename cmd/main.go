@@ -27,9 +27,8 @@ type Recipe struct {
 
 func main() {
 	fmt.Println("Connection Started...")
-	client, err := database.CreateConnection()
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
+	client, err := database.CreateConnection(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

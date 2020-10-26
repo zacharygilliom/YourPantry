@@ -31,11 +31,12 @@ type Ingredient struct {
 	Name string             `bson:"name, omitempty"`
 }
 
-func CreateConnection() (*mongo.Client, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://admin:Branstark1@production.tobvq.mongodb.net/pantry?retryWrites=true&w=majority"))
+func CreateConnection(ctx context.Context) (*mongo.Client, error) {
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb+srv://admin:Branstark1@production.tobvq.mongodb.net/pantry?retryWrites=true&w=majority"))
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Database Connected")
 	return client, err
 }
 
@@ -56,6 +57,7 @@ func InsertDataToCollection(collection *mongo.Collection, data string) {
 		{"name", data},
 	}
 	result, err := collection.InsertOne(ctx, ingredient)
+	fmt.Println("Data added to collection")
 	if err != nil {
 		log.Fatal(err)
 	}
