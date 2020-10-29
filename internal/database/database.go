@@ -13,12 +13,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-//type User struct {
-//	ID        primitive.ObjectID `bson:"_id, omitempty"`
-//	Firstname string             `bson:"firstname, omitempty"`
-//	Lastname  string             `bson:"lastname, omitempty"`
-//	Email     string             `bson:"email, omitempty"`
-//}
+type User struct {
+	ID              primitive.ObjectID `bson:"_id, omitempty"`
+	Firstname       string             `bson:"firstname, omitempty"`
+	Lastname        string             `bson:"lastname, omitempty"`
+	Email           string             `bson:"email, omitempty"`
+	IngredientsList []Ingredient       `bson:"ingredientslist, omitempty"`
+}
+
 //
 //type IngredientList struct {
 //	ID         primitive.ObjectID `bson:"_id, omitempty"`
@@ -36,7 +38,6 @@ func CreateConnection(ctx context.Context) (*mongo.Client, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Database Connected")
 	return client, err
 }
 
@@ -50,7 +51,18 @@ func NewCollection(collectionName string, database *mongo.Database) *mongo.Colle
 	return collection
 }
 
-func InsertDataToCollection(collection *mongo.Collection, data string) {
+func InsertDataToUsers(collection *mongo.Collection, data bson.D) {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	defer ctx.Done()
+	result, err := collection.InsertOne(ctx, data)
+	fmt.Println("User Added to Collection")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(result.InsertedID)
+}
+
+func InsertDataToIngredients(collection *mongo.Collection, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	ingredient := bson.D{
@@ -64,7 +76,7 @@ func InsertDataToCollection(collection *mongo.Collection, data string) {
 	fmt.Println(result.InsertedID)
 }
 
-func RemoveManyFromCollection(collection *mongo.Collection, data string) {
+func RemoveManyFromIngredients(collection *mongo.Collection, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	filter := bson.D{

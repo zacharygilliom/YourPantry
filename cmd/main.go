@@ -1,17 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/zacharygilliom/internal/database"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -37,15 +35,20 @@ func main() {
 	databaseName := "pantry"
 	pantryDatabase := database.NewDatabase(databaseName, client)
 
+	userCollection := "user"
+	pantryUser := database.NewCollection(userCollection, pantryDatabase)
+
 	ingredientCollection := "ingredient"
 	pantryIngredient := database.NewCollection(ingredientCollection, pantryDatabase)
+
+	userData := getUserInfo()
+	database.InsertDataToUsers(pantryUser, userData)
 
 	userChoice := AppMenu()
 	AppSelection(userChoice, pantryIngredient)
 }
 
 func AppMenu() string {
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Your Pantry Application")
 	fmt.Println("-----------------------")
 	fmt.Println("Please select an action")
@@ -55,8 +58,7 @@ func AppMenu() string {
 	fmt.Println("4. Search Recipes")
 	fmt.Println("5. Close application")
 	fmt.Println("-----------------------")
-	text, _ := reader.ReadString('\n')
-	text = strings.Replace(text, "\n", "", -1)
+	text := getUserInput()
 	return text
 }
 
@@ -64,18 +66,14 @@ func AppSelection(choice string, collection *mongo.Collection) {
 	switch choice {
 	case "1":
 		fmt.Println("Please type the ingredient to add...")
-		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
-		database.InsertDataToCollection(collection, text)
+		text := getUserInput()
+		database.InsertDataToIngredients(collection, text)
 		userChoice := AppMenu()
 		AppSelection(userChoice, collection)
 	case "2":
 		fmt.Println("Please type the ingredient to remove...")
-		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
-		database.RemoveManyFromCollection(collection, text)
+		text := getUserInput()
+		database.RemoveManyFromIngredients(collection, text)
 		userChoice := AppMenu()
 		AppSelection(userChoice, collection)
 	case "3":
@@ -89,6 +87,30 @@ func AppSelection(choice string, collection *mongo.Collection) {
 	case "5":
 		fmt.Println("Application Closed")
 	}
+}
+
+func getUserInput() string {
+	var text string
+	fmt.Scanf("%s", &text)
+	return text
+}
+
+func getUserInfo() bson.D {
+	var firstName string
+	var lastName string
+	var email string
+	fmt.Println("Please enter the User's First Name")
+	fmt.Scanf("%s", &firstName)
+	fmt.Println("Please enter the User's Last Name")
+	fmt.Scanf("%s", &lastName)
+	fmt.Println("Please enter the User's Email")
+	fmt.Scanf("%s", &email)
+	data := bson.D{
+		{"firstname", firstName},
+		{"lastname", lastName},
+		{"email", email},
+	}
+	return data
 }
 
 func SearchIngredients(collection *mongo.Collection) {
