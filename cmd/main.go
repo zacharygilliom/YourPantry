@@ -42,10 +42,11 @@ func main() {
 	pantryIngredient := database.NewCollection(ingredientCollection, pantryDatabase)
 
 	userData := getUserInfo()
-	database.InsertDataToUsers(pantryUser, userData)
+	userID := database.InsertDataToUsers(pantryUser, userData)
+	fmt.Println(userID)
 
 	userChoice := AppMenu()
-	AppSelection(userChoice, pantryIngredient)
+	AppSelection(userChoice, pantryIngredient, userID)
 }
 
 func AppMenu() string {
@@ -62,28 +63,28 @@ func AppMenu() string {
 	return text
 }
 
-func AppSelection(choice string, collection *mongo.Collection) {
+func AppSelection(choice string, collection *mongo.Collection, user interface{}) {
 	switch choice {
 	case "1":
 		fmt.Println("Please type the ingredient to add...")
 		text := getUserInput()
-		database.InsertDataToIngredients(collection, text)
+		database.InsertDataToIngredients(collection, user, text)
 		userChoice := AppMenu()
-		AppSelection(userChoice, collection)
+		AppSelection(userChoice, collection, user)
 	case "2":
 		fmt.Println("Please type the ingredient to remove...")
 		text := getUserInput()
-		database.RemoveManyFromIngredients(collection, text)
+		database.RemoveManyFromIngredients(collection, user, text)
 		userChoice := AppMenu()
-		AppSelection(userChoice, collection)
+		AppSelection(userChoice, collection, user)
 	case "3":
 		database.ListDocuments(collection)
 		userChoice := AppMenu()
-		AppSelection(userChoice, collection)
+		AppSelection(userChoice, collection, user)
 	case "4":
 		SearchIngredients(collection)
 		userChoice := AppMenu()
-		AppSelection(userChoice, collection)
+		AppSelection(userChoice, collection, user)
 	case "5":
 		fmt.Println("Application Closed")
 	}

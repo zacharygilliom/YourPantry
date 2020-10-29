@@ -14,11 +14,11 @@ import (
 )
 
 type User struct {
-	ID              primitive.ObjectID `bson:"_id, omitempty"`
-	Firstname       string             `bson:"firstname, omitempty"`
-	Lastname        string             `bson:"lastname, omitempty"`
-	Email           string             `bson:"email, omitempty"`
-	IngredientsList []Ingredient       `bson:"ingredientslist, omitempty"`
+	ID        primitive.ObjectID `bson:"_id, omitempty"`
+	Firstname string             `bson:"firstname, omitempty"`
+	Lastname  string             `bson:"lastname, omitempty"`
+	Email     string             `bson:"email, omitempty"`
+	//IngredientsList []Ingredient       `bson:"ingredientslist, omitempty"`
 }
 
 //
@@ -30,6 +30,7 @@ type User struct {
 //
 type Ingredient struct {
 	ID   primitive.ObjectID `bson:"_id, omitempty"`
+	User primitive.ObjectID `bson:"user, omitempty"`
 	Name string             `bson:"name, omitempty"`
 }
 
@@ -51,7 +52,7 @@ func NewCollection(collectionName string, database *mongo.Database) *mongo.Colle
 	return collection
 }
 
-func InsertDataToUsers(collection *mongo.Collection, data bson.D) {
+func InsertDataToUsers(collection *mongo.Collection, data bson.D) interface{} {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	result, err := collection.InsertOne(ctx, data)
@@ -59,13 +60,15 @@ func InsertDataToUsers(collection *mongo.Collection, data bson.D) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(result.InsertedID)
+	res := result.InsertedID
+	return res
 }
 
-func InsertDataToIngredients(collection *mongo.Collection, data string) {
+func InsertDataToIngredients(collection *mongo.Collection, user interface{}, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	ingredient := bson.D{
+		{"user", user},
 		{"name", data},
 	}
 	result, err := collection.InsertOne(ctx, ingredient)
@@ -76,10 +79,11 @@ func InsertDataToIngredients(collection *mongo.Collection, data string) {
 	fmt.Println(result.InsertedID)
 }
 
-func RemoveManyFromIngredients(collection *mongo.Collection, data string) {
+func RemoveManyFromIngredients(collection *mongo.Collection, user interface{}, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	filter := bson.D{
+		{"user", user},
 		{"name", data},
 	}
 	result, err := collection.DeleteMany(ctx, filter)
