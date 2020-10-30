@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zacharygilliom/configs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,7 +36,9 @@ type Ingredient struct {
 }
 
 func CreateConnection(ctx context.Context) (*mongo.Client, error) {
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb+srv://admin:Branstark1@production.tobvq.mongodb.net/pantry?retryWrites=true&w=majority"))
+	user, password, database := configs.GetMongoCreds()
+	databaseURI := "mongodb+srv://" + user + ":" + password + "@production.tobvq.mongodb.net/" + database + "?retryWrites=true&w=majority"
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(databaseURI))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,11 +67,11 @@ func InsertDataToUsers(collection *mongo.Collection, data bson.D) interface{} {
 	return res
 }
 
-func InsertDataToIngredients(collection *mongo.Collection, user interface{}, data string) {
+func InsertDataToIngredients(collection *mongo.Collection, userID interface{}, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	ingredient := bson.D{
-		{"user", user},
+		{"user", userID},
 		{"name", data},
 	}
 	result, err := collection.InsertOne(ctx, ingredient)
@@ -79,11 +82,11 @@ func InsertDataToIngredients(collection *mongo.Collection, user interface{}, dat
 	fmt.Println(result.InsertedID)
 }
 
-func RemoveManyFromIngredients(collection *mongo.Collection, user interface{}, data string) {
+func RemoveManyFromIngredients(collection *mongo.Collection, userID interface{}, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	filter := bson.D{
-		{"user", user},
+		{"user", userID},
 		{"name", data},
 	}
 	result, err := collection.DeleteMany(ctx, filter)
@@ -99,10 +102,10 @@ func RemoveManyFromIngredients(collection *mongo.Collection, user interface{}, d
 	fmt.Println("")
 }
 
-func ListDocuments(collection *mongo.Collection) {
+func ListDocuments(collection *mongo.Collection, userID interface{}) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	cursor, err := collection.Find(ctx, bson.M{})
+	cursor, err := collection.Find(ctx, bson.M{"user": userID})
 	if err != nil {
 		log.Fatal(err)
 	} else {
@@ -118,10 +121,10 @@ func ListDocuments(collection *mongo.Collection) {
 	}
 }
 
-func BuildIngredientString(collection *mongo.Collection) string {
+func BuildIngredientString(collection *mongo.Collection, userID interface{}) string {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	cursor, err := collection.Find(ctx, bson.M{})
+	cursor, err := collection.Find(ctx, bson.M{"user": userID})
 	var ings strings.Builder
 	if err != nil {
 		log.Fatal(err)
