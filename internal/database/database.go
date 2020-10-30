@@ -58,13 +58,34 @@ func NewCollection(collectionName string, database *mongo.Database) *mongo.Colle
 func InsertDataToUsers(collection *mongo.Collection, data bson.D) interface{} {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	result, err := collection.InsertOne(ctx, data)
-	fmt.Println("User Added to Collection")
+	userEmail := data.email
+	cursor, err := collection.Find(ctx, bson.W{"email", userEmail})
+	var userCheck string
 	if err != nil {
 		log.Fatal(err)
+	} else {
+		for cursor.Next(ctx) {
+			var mongoUsers User
+			err := cursor.Decode(&mongoUsers)
+			if err != nil {
+				log.Fatal(err)
+			} else {
+				userCheck := mongoUsers.Email
+			}
+		}
 	}
-	res := result.InsertedID
-	return res
+	r
+	if userCheck == "" {
+		result, err := collection.InsertOne(ctx, data)
+		fmt.Println("User Added to Collection")
+		if err != nil {
+			log.Fatal(err)
+		}
+		res := result.InsertedID
+		return res
+	} else {
+		return userCheck
+	}
 }
 
 func InsertDataToIngredients(collection *mongo.Collection, userID interface{}, data string) {
