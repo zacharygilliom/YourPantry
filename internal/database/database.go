@@ -22,6 +22,12 @@ type User struct {
 	//IngredientsList []Ingredient       `bson:"ingredientslist, omitempty"`
 }
 
+type CreatedUser struct {
+	Firstname string
+	Lastname  string
+	Email     string
+}
+
 //
 //type IngredientList struct {
 //	ID         primitive.ObjectID `bson:"_id, omitempty"`
@@ -55,36 +61,48 @@ func NewCollection(collectionName string, database *mongo.Database) *mongo.Colle
 	return collection
 }
 
-func InsertDataToUsers(collection *mongo.Collection, data bson.D) interface{} {
+func GetUserInfo() User {
+	var NewUser User
+	fmt.Println("Please enter the User's First Name")
+	fmt.Scanf("%s", &NewUser.Firstname)
+	fmt.Println("Please enter the User's Last Name")
+	fmt.Scanf("%s", &NewUser.Lastname)
+	fmt.Println("Please enter the User's Email")
+	fmt.Scanf("%s", &NewUser.Email)
+	return NewUser
+}
+
+func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface{} {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	userEmail := data.email
-	cursor, err := collection.Find(ctx, bson.W{"email", userEmail})
+	cursor, err := collection.Find(ctx, bson.M{"email": createdUser.Email})
+	var mongoUser User
 	var userCheck string
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		for cursor.Next(ctx) {
-			var mongoUsers User
-			err := cursor.Decode(&mongoUsers)
+			err := cursor.Decode(&mongoUser)
 			if err != nil {
 				log.Fatal(err)
-			} else {
-				userCheck := mongoUsers.Email
 			}
+			userCheck = mongoUser.Email
 		}
 	}
-	r
 	if userCheck == "" {
+		data := bson.D{
+			{"firstname", createdUser.Firstname},
+			{"lastname", createdUser.Lastname},
+			{"email", createdUser.Email},
+		}
 		result, err := collection.InsertOne(ctx, data)
 		fmt.Println("User Added to Collection")
 		if err != nil {
 			log.Fatal(err)
 		}
-		res := result.InsertedID
-		return res
+		return result.InsertedID
 	} else {
-		return userCheck
+		return mongoUser.ID
 	}
 }
 
@@ -156,7 +174,7 @@ func BuildIngredientString(collection *mongo.Collection, userID interface{}) str
 			if err != nil {
 				log.Fatal(err)
 			} else {
-				ings.WriteString(result.Name + "&")
+				ings.WriteString(result.Name + ",")
 			}
 		}
 	}
