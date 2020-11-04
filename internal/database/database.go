@@ -19,7 +19,6 @@ type User struct {
 	Firstname string             `bson:"firstname, omitempty"`
 	Lastname  string             `bson:"lastname, omitempty"`
 	Email     string             `bson:"email, omitempty"`
-	//IngredientsList []Ingredient       `bson:"ingredientslist, omitempty"`
 }
 
 type CreatedUser struct {
@@ -28,13 +27,6 @@ type CreatedUser struct {
 	Email     string
 }
 
-//
-//type IngredientList struct {
-//	ID         primitive.ObjectID `bson:"_id, omitempty"`
-//	User       primitive.ObjectID `bson:"user, omitempty"`
-//	Ingredient []Ingredient       `bson:"ingredient"`
-//}
-//
 type Ingredient struct {
 	ID   primitive.ObjectID `bson:"_id, omitempty"`
 	User primitive.ObjectID `bson:"user, omitempty"`

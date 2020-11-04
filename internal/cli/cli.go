@@ -36,7 +36,7 @@ func Menu() string {
 
 func getUserInput() string {
 	var text string
-	fmt.Scanf("%s", &text)
+	fmt.Scanln(&text)
 	return text
 }
 
