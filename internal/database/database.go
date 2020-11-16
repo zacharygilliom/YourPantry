@@ -21,11 +21,13 @@ type User struct {
 	Email     string             `bson:"email, omitempty"`
 }
 
+/*
 type CreatedUser struct {
 	Firstname string
 	Lastname  string
 	Email     string
 }
+*/
 
 type Ingredient struct {
 	ID   primitive.ObjectID `bson:"_id, omitempty"`
