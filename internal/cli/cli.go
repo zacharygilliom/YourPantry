@@ -1,10 +1,7 @@
 package cli
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
 
 	"github.com/zacharygilliom/internal/database"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -67,14 +64,13 @@ func Selection(choice string, collection *mongo.Collection, userID interface{}) 
 	}
 }
 
+/*
 func SearchIngredients(collection *mongo.Collection, userID interface{}) {
 	ingred := database.BuildIngredientString(collection, userID)
 	resp, err := http.Get("https://api.spoonacular.com/recipes/complexSearch?apiKey=58bbec758ee847f7b331410b02c7252d&findByIngredients=" + ingred + "&number=10")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
-
 	var r RecipeList
 
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
@@ -87,3 +83,4 @@ func SearchIngredients(collection *mongo.Collection, userID interface{}) {
 		fmt.Println(rec.Title)
 	}
 }
+*/
