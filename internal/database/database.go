@@ -154,7 +154,7 @@ func ListDocuments(collection *mongo.Collection, userID interface{}) {
 	}
 }
 
-func BuildIngredientString(collection *mongo.Collection, userID interface{}) string {
+func BuildStringFromIngredients(collection *mongo.Collection, userID interface{}) string {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	cursor, err := collection.Find(ctx, bson.M{"user": userID})

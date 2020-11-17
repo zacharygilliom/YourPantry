@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/zacharygilliom/internal/database"
+	"github.com/zacharygilliom/internal/recipe"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -56,7 +57,8 @@ func Selection(choice string, collection *mongo.Collection, userID interface{}) 
 		userChoice := Menu()
 		Selection(userChoice, collection, userID)
 	case "4":
-		SearchIngredients(collection, userID)
+		recipe.GetRecipes(collection, userID)
+		//SearchIngredients(collection, userID)
 		userChoice := Menu()
 		Selection(userChoice, collection, userID)
 	case "5":
@@ -66,7 +68,7 @@ func Selection(choice string, collection *mongo.Collection, userID interface{}) 
 
 /*
 func SearchIngredients(collection *mongo.Collection, userID interface{}) {
-	ingred := database.BuildIngredientString(collection, userID)
+	ingred := database.BuildStringFromIngredients(collection, userID)
 	resp, err := http.Get("https://api.spoonacular.com/recipes/complexSearch?apiKey=58bbec758ee847f7b331410b02c7252d&findByIngredients=" + ingred + "&number=10")
 	if err != nil {
 		log.Fatal(err)
