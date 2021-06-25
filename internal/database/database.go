@@ -67,7 +67,8 @@ func GetUserInfo() User {
 }
 
 func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface{} {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	defer ctx.Done()
 	cursor, err := collection.Find(ctx, bson.M{"email": createdUser.Email})
 	var mongoUser User
