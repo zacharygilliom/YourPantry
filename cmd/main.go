@@ -11,7 +11,8 @@ import (
 )
 
 func main() {
-	fmt.Println("Connection Started...") ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	fmt.Println("Connection Started...")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	client, err := database.CreateConnection(ctx)
 	if err != nil {
