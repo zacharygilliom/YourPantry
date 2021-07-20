@@ -9,21 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Next struct {
-	Href  string `json:"href"`
-	Title string `json:"title"`
-}
-
-type Link struct {
-	Det Next `json:"next"`
-}
-type Recipes struct {
-	From  int  `json:"from"`
-	To    int  `json:"to"`
-	Count int  `json:"count"`
-	Links Link `json:"_links"`
-}
-
 func GetRecipes(collection *mongo.Collection, userID interface{}) {
 	var rs Recipes
 	//ingredients := database.BuildStringFromIngredients(collection, userID)
@@ -35,7 +20,7 @@ func GetRecipes(collection *mongo.Collection, userID interface{}) {
 	}
 	dec := json.NewDecoder(resp.Body)
 	dec.Decode(&rs)
-	fmt.Printf("%v %v %v %v", rs.From, rs.To, rs.Count, rs.Links.Det.Title)
+	fmt.Printf("%v %v %v %v", rs.From, rs.To, rs.Count, rs.Hits)
 	//recipes, err := io.ReadAll(resp.Body)
 	//fmt.Println(recipes)
 	//fmt.Println(resp.Body)
