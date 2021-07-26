@@ -20,28 +20,35 @@ type Links struct {
 	Next Next `json:"next"`
 }
 type Ingredients struct {
-	Text     string `json:"text"`
-	Quantity int    `json:"quantity"`
-	Measure  string `json:"measure"`
-	Food     string `json:"food"`
-	Weight   int    `json:"weight"`
-	FoodID   string `json:"foodId"`
+	Text     string  `json:"text"`
+	Quantity float64 `json:"quantity"`
+	Measure  string  `json:"measure"`
+	Food     string  `json:"food"`
+	Weight   float64 `json:"weight"`
+	FoodID   string  `json:"foodId"`
 }
 type TotalNutrients struct {
 }
 type TotalDaily struct {
 }
 type Sub struct {
+	Label        string  `json:"label"`
+	Tag          string  `json:"tag"`
+	SchemaOrgTag string  `json:"schemaOrgTag"`
+	Total        float64 `json:"total"`
+	HasRDI       bool    `json:"hasRDI"`
+	Daily        float64 `json:"daily"`
+	Unit         string  `json:"unit"`
 }
 type Digest struct {
-	Label        string `json:"label"`
-	Tag          string `json:"tag"`
-	SchemaOrgTag string `json:"schemaOrgTag"`
-	Total        int    `json:"total"`
-	HasRDI       bool   `json:"hasRDI"`
-	Daily        int    `json:"daily"`
-	Unit         string `json:"unit"`
-	Sub          Sub    `json:"sub"`
+	Label        string  `json:"label"`
+	Tag          string  `json:"tag"`
+	SchemaOrgTag string  `json:"schemaOrgTag"`
+	Total        float64 `json:"total"`
+	HasRDI       bool    `json:"hasRDI"`
+	Daily        float64 `json:"daily"`
+	Unit         string  `json:"unit"`
+	Sub          []Sub   `json:"sub"`
 }
 type Recipe struct {
 	URI             string         `json:"uri"`
@@ -50,14 +57,14 @@ type Recipe struct {
 	Source          string         `json:"source"`
 	URL             string         `json:"url"`
 	ShareAs         string         `json:"shareAs"`
-	Yield           int            `json:"yield"`
+	Yield           float64        `json:"yield"`
 	DietLabels      []string       `json:"dietLabels"`
 	HealthLabels    []string       `json:"healthLabels"`
 	Cautions        []string       `json:"cautions"`
 	IngredientLines []string       `json:"ingredientLines"`
 	Ingredients     []Ingredients  `json:"ingredients"`
-	Calories        int            `json:"calories"`
-	TotalWeight     int            `json:"totalWeight"`
+	Calories        float64        `json:"calories"`
+	TotalWeight     float64        `json:"totalWeight"`
 	CuisineType     []string       `json:"cuisineType"`
 	MealType        []string       `json:"mealType"`
 	DishType        []string       `json:"dishType"`

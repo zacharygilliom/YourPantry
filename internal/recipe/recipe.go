@@ -18,28 +18,13 @@ func GetRecipes(collection *mongo.Collection, userID interface{}) {
 	} else if err == nil {
 		fmt.Println("Request Sent Successfully")
 	}
-	/*
-			dec := json.NewDecoder(resp.Body)
-			dec.Decode(&rs)
-			fmt.Printf("%v", rs.Hits)
-		if err := json.NewDecoder(resp.Body); err != nil {
-			log.Fatal(err)
-		} else {
-			fmt.Println("New Decoder Successful")
-		}
-	*/
 	if err := json.NewDecoder(resp.Body).Decode(&rs); err != nil {
 		log.Fatal(err)
-	} else {
-		fmt.Println("Decoded into recipes struct successfully")
-		fmt.Printf("%v", rs.Hits)
 	}
-	//fmt.Printf("%v", rs.Hits)
+	//fmt.Printf("%v", rs.Hits[0].Recipe.Label)
 	defer resp.Body.Close()
 
-	/*
-		for _, rec := range r.List {
-			fmt.Println(rec.Title)
-		}
-	*/
+	for _, hit := range rs.Hits {
+		fmt.Printf("%v", hit.Recipe.Label)
+	}
 }
