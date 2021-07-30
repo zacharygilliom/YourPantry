@@ -20,12 +20,10 @@ type Links struct {
 	Next Next `json:"next"`
 }
 type Ingredients struct {
-	Text     string  `json:"text"`
-	Quantity float64 `json:"quantity"`
-	Measure  string  `json:"measure"`
-	Food     string  `json:"food"`
-	Weight   float64 `json:"weight"`
-	FoodID   string  `json:"foodId"`
+	Text         string  `json:"text"`
+	Weight       float64 `json:"weight"`
+	FoodCategory string  `json:"foodCategory"`
+	FoodID       string  `json:"foodId"`
 }
 type TotalNutrients struct {
 }
@@ -50,7 +48,7 @@ type Digest struct {
 	Unit         string  `json:"unit"`
 	Sub          []Sub   `json:"sub"`
 }
-type Recipe struct {
+type recipe struct {
 	URI             string         `json:"uri"`
 	Label           string         `json:"label"`
 	Image           string         `json:"image"`
@@ -73,6 +71,6 @@ type Recipe struct {
 	Digest          []Digest       `json:"digest"`
 }
 type Hits struct {
-	Recipe Recipe `json:"recipe"`
+	Recipe recipe `json:"recipe"`
 	Links  Links  `json:"_links"`
 }

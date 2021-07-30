@@ -57,12 +57,17 @@ func NewCollection(collectionName string, database *mongo.Database) *mongo.Colle
 
 func GetUserInfo() User {
 	var NewUser User
-	fmt.Println("Please enter the User's First Name")
-	fmt.Scanf("%s", &NewUser.Firstname)
-	fmt.Println("Please enter the User's Last Name")
-	fmt.Scanf("%s", &NewUser.Lastname)
-	fmt.Println("Please enter the User's Email")
-	fmt.Scanf("%s", &NewUser.Email)
+	/*
+		fmt.Println("Please enter the User's First Name")
+		fmt.Scanf("%s", &NewUser.Firstname)
+		fmt.Println("Please enter the User's Last Name")
+		fmt.Scanf("%s", &NewUser.Lastname)
+		fmt.Println("Please enter the User's Email")
+		fmt.Scanf("%s", &NewUser.Email)
+	*/
+	NewUser.Firstname = "Zachary"
+	NewUser.Lastname = "Gilliom"
+	NewUser.Email = "zacharygilliom@gmail.com"
 	return NewUser
 }
 
