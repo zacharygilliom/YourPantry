@@ -38,6 +38,14 @@ func getUserInput() string {
 	return text
 }
 
+func chooseIngredient() string {
+	var text string
+	fmt.Println("Please choose a keyword for the type of recipe you want.")
+	fmt.Println("For example if you want a chicken dish, type 'chicken'")
+	fmt.Scanln(&text)
+	return text
+}
+
 func Selection(choice string, collection *mongo.Collection, userID interface{}) {
 	switch choice {
 	case "1":
@@ -57,7 +65,8 @@ func Selection(choice string, collection *mongo.Collection, userID interface{}) 
 		userChoice := Menu()
 		Selection(userChoice, collection, userID)
 	case "4":
-		recipe.GetRecipes(collection, userID)
+		keyword := chooseIngredient()
+		recipe.GetRecipes(collection, userID, keyword)
 		//SearchIngredients(collection, userID)
 		userChoice := Menu()
 		Selection(userChoice, collection, userID)
