@@ -63,3 +63,7 @@ func GetRecipes(collection *mongo.Collection, userID interface{}, keyword string
 		fmt.Println(rec.Ingredients)
 	}
 }
+
+func checkRecipeWithIngredientList(rs Recipes) {
+
+}
