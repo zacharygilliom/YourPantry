@@ -1,18 +1,15 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
 
-func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run()
-}
+	"github.com/zacharygilliom/internal/cli"
+	"github.com/zacharygilliom/internal/database"
+)
 
-/*
 func main() {
 	fmt.Println("Connection Started...")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -40,4 +37,3 @@ func main() {
 	userChoice := cli.Menu()
 	cli.Selection(userChoice, pantryIngredient, userID)
 }
-*/
