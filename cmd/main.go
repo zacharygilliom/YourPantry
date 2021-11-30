@@ -37,7 +37,6 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/:ingredient", addIngredient(c*gin.Context, pantryIngredient))
-
 	r.Run()
 }
 
