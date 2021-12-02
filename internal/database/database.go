@@ -45,8 +45,8 @@ func CreateConnection(ctx context.Context) (*mongo.Client, error) {
 	return client, err
 }
 
-func NewDatabase(databaseName string, client *mongo.Client) *mongo.Database {
-	database := client.Database(databaseName)
+func NewDatabase(client *mongo.Client) *mongo.Database {
+	database := client.Database("pantry")
 	return database
 }
 
@@ -141,10 +141,11 @@ func RemoveManyFromIngredients(collection *mongo.Collection, userID interface{},
 	fmt.Println("")
 }
 
-func ListDocuments(collection *mongo.Collection, userID interface{}) {
+func ListDocuments(collection *mongo.Collection, userID interface{}) []Ingredient {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	cursor, err := collection.Find(ctx, bson.M{"user": userID})
+	var results []Ingredient
 	if err != nil {
 		log.Fatal(err)
 	} else {
@@ -154,10 +155,11 @@ func ListDocuments(collection *mongo.Collection, userID interface{}) {
 			if err != nil {
 				log.Fatal(err)
 			} else {
-				fmt.Println(result.Name)
+				results = append(results, result)
 			}
 		}
 	}
+	return results
 }
 
 func BuildStringFromIngredients(collection *mongo.Collection, userID interface{}) string {
