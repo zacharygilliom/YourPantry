@@ -36,7 +36,8 @@ func main() {
 	userID := database.InsertDataToUsers(pantryUser, userData)
 
 	r := gin.Default()
-	r.GET("/:ingredient", addIngredient(userID, pantryIngredient))
+	r.GET("/ingredient/add/:ingredient", addIngredient(userID, pantryIngredient))
+	r.GET("/ingredient/remove/:ingredient", removeIngredient(userID, pantryIngredient))
 	r.Run()
 }
 
@@ -46,6 +47,17 @@ func addIngredient(userID interface{}, collection *mongo.Collection) gin.Handler
 		database.InsertDataToIngredients(collection, userID, ingredient)
 		c.JSON(200, gin.H{
 			"message": "Ingredient added",
+		})
+	}
+	return gin.HandlerFunc(fn)
+}
+
+func removeIngredient(userID interface{}, collection *mongo.Collection) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		ingredient := c.Param("ingredient")
+		database.RemoveManyFromIngredients(collection, userID, ingredient)
+		c.JSON(200, gin.H{
+			"message": "Ingredient removed",
 		})
 	}
 	return gin.HandlerFunc(fn)
