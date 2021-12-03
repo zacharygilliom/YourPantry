@@ -35,9 +35,9 @@ func main() {
 
 	//routers
 	r := gin.Default()
-	r.GET("/ingredients/add/:ingredient", addIngredient(userID, pantryIngredient))
-	r.GET("/ingredients/remove/:ingredient", removeIngredient(userID, pantryIngredient))
-	r.GET("/ingredients/list/", listIngredients(userID, pantryIngredient))
+	r.POST("/ingredients/add/:ingredient", addIngredient(userID, pantryIngredient))
+	r.POST("/ingredients/remove/:ingredient", removeIngredient(userID, pantryIngredient))
+	r.GET("/ingredients/list", listIngredients(userID, pantryIngredient))
 	r.Run()
 }
 
@@ -55,10 +55,19 @@ func addIngredient(userID interface{}, collection *mongo.Collection) gin.Handler
 func removeIngredient(userID interface{}, collection *mongo.Collection) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		ingredient := c.Param("ingredient")
-		database.RemoveManyFromIngredients(collection, userID, ingredient)
-		c.JSON(200, gin.H{
-			"message": "Ingredient removed",
-		})
+		ingsRemoved := database.RemoveManyFromIngredients(collection, userID, ingredient)
+		data := map[int64]string{ingsRemoved: ingredient}
+		if ingsRemoved > 0 {
+			c.JSON(200, gin.H{
+				"message": "Ingredient removed",
+				"data":    data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"message": "Ingredient is not in your pantry. Did you misspell it?",
+				"data":    data,
+			})
+		}
 	}
 	return gin.HandlerFunc(fn)
 }

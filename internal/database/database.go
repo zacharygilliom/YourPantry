@@ -114,14 +114,14 @@ func InsertDataToIngredients(collection *mongo.Collection, userID interface{}, d
 		{"name", data},
 	}
 	result, err := collection.InsertOne(ctx, ingredient)
-	fmt.Println("Data added to collection")
+	fmt.Printf("%v added to collection\n", data)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(result.InsertedID)
 }
 
-func RemoveManyFromIngredients(collection *mongo.Collection, userID interface{}, data string) {
+func RemoveManyFromIngredients(collection *mongo.Collection, userID interface{}, data string) int64 {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	filter := bson.D{
@@ -133,12 +133,13 @@ func RemoveManyFromIngredients(collection *mongo.Collection, userID interface{},
 		log.Fatal(err)
 	}
 	if result.DeletedCount > 1 {
-		fmt.Printf("%v instances of %v deleted", result.DeletedCount, data)
+		fmt.Printf("%v instances of %v deleted\n", result.DeletedCount, data)
+	} else if result.DeletedCount == 0 {
+		fmt.Printf("%v instances of %v exist, no action taken\n", result.DeletedCount, data)
 	} else {
-		fmt.Printf("%v instance of %v deleted", result.DeletedCount, data)
+		fmt.Printf("%v instance of %v deleted\n", result.DeletedCount, data)
 	}
-	fmt.Println("")
-	fmt.Println("")
+	return result.DeletedCount
 }
 
 func ListDocuments(collection *mongo.Collection, userID interface{}) []Ingredient {
