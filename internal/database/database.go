@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type User struct {
@@ -43,6 +44,17 @@ func CreateConnection(ctx context.Context) (*mongo.Client, error) {
 		log.Fatal(err)
 	}
 	return client, err
+}
+
+func PingClient(ctx context.Context, client *mongo.Client) (string, error) {
+	err := client.Ping(ctx, readpref.Primary())
+	message := ""
+	if err != nil {
+		message = "client not connected"
+	} else {
+		message = "client connected"
+	}
+	return message, err
 }
 
 func NewDatabase(client *mongo.Client) *mongo.Database {

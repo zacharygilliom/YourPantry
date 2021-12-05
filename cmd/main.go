@@ -37,7 +37,7 @@ func main() {
 	r := gin.Default()
 	r.POST("/ingredients/add/:ingredient", addIngredient(userID, pantryIngredient))
 	r.POST("/ingredients/remove/:ingredient", removeIngredient(userID, pantryIngredient))
-	r.GET("/ingredients/list", listIngredients(userID, pantryIngredient))
+	r.GET("/ingredients/list", listIngredients(userID, pantryIngredient, ctx, client))
 	r.Run()
 }
 
@@ -72,13 +72,21 @@ func removeIngredient(userID interface{}, collection *mongo.Collection) gin.Hand
 	return gin.HandlerFunc(fn)
 }
 
-func listIngredients(userID interface{}, collection *mongo.Collection) gin.HandlerFunc {
+func listIngredients(userID interface{}, collection *mongo.Collection, ctx context.Context, client *mongo.Client) gin.HandlerFunc {
 	//Need to add error catch in case resultsMap returns an empty string
 	fn := func(c *gin.Context) {
 		ingredList := database.ListDocuments(collection, userID)
 		resultsMap := make(map[int]string)
 		for i, ing := range ingredList {
 			resultsMap[i] = ing.Name
+		}
+		if len(resultsMap) == 0 {
+			res, err := database.PingClient(ctx, client)
+			if err != nil {
+				c.JSON(200, gin.H{
+					"message": res,
+				})
+			}
 		}
 		c.JSON(200, resultsMap)
 	}
