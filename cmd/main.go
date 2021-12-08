@@ -34,11 +34,30 @@ func main() {
 	userID := database.InsertDataToUsers(pantryUser, userData)
 
 	//routers
+	// Need to pass the userID as a paramater in the api that gets returned after the frontend calls the addUser endpoint.
 	r := gin.Default()
 	r.POST("/ingredients/add/:ingredient", addIngredient(userID, pantryIngredient))
 	r.POST("/ingredients/remove/:ingredient", removeIngredient(userID, pantryIngredient))
+	r.POST("/user/add/:firstName/:lastName/:email", addUser(pantryUser))
+	//r.GET("/user/list/:firstName/:lastName/:email", listUsers())
 	r.GET("/ingredients/list", listIngredients(userID, pantryIngredient, ctx, client))
 	r.Run()
+}
+
+func addUser(collection *mongo.Collection) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		newUser := database.User{
+			Firstname: c.Param("firstName"),
+			Lastname:  c.Param("lastName"),
+			Email:     c.Param("email"),
+		}
+		newUserID := database.InsertDataToUsers(collection, newUser)
+		c.JSON(200, gin.H{
+			"message": "New User Created",
+			"data":    newUserID,
+		})
+	}
+	return gin.HandlerFunc(fn)
 }
 
 func addIngredient(userID interface{}, collection *mongo.Collection) gin.HandlerFunc {
@@ -73,7 +92,6 @@ func removeIngredient(userID interface{}, collection *mongo.Collection) gin.Hand
 }
 
 func listIngredients(userID interface{}, collection *mongo.Collection, ctx context.Context, client *mongo.Client) gin.HandlerFunc {
-	//Need to add error catch in case resultsMap returns an empty string
 	fn := func(c *gin.Context) {
 		ingredList := database.ListDocuments(collection, userID)
 		resultsMap := make(map[int]string)
@@ -92,33 +110,3 @@ func listIngredients(userID interface{}, collection *mongo.Collection, ctx conte
 	}
 	return gin.HandlerFunc(fn)
 }
-
-/*
-func main() {
-	fmt.Println("Connection Started...")
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	client, err := database.CreateConnection(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Disconnect(ctx)
-
-	fmt.Println("Connection Established")
-
-	databaseName := "pantry"
-	pantryDatabase := database.NewDatabase(databaseName, client)
-
-	userCollection := "user"
-	pantryUser := database.NewCollection(userCollection, pantryDatabase)
-
-	ingredientCollection := "ingredient"
-	pantryIngredient := database.NewCollection(ingredientCollection, pantryDatabase)
-
-	userData := database.GetUserInfo()
-	userID := database.InsertDataToUsers(pantryUser, userData)
-
-	userChoice := cli.Menu()
-	cli.Selection(userChoice, pantryIngredient, userID)
-}
-*/
