@@ -118,9 +118,13 @@ func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface
 	}
 }
 
-func InsertDataToIngredients(collection *mongo.Collection, userID interface{}, data string) {
+func InsertDataToIngredients(collection *mongo.Collection, userHex string, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
+	userID, err := primitive.ObjectIDFromHex(userHex)
+	if err != nil {
+		log.Fatal(err)
+	}
 	ingredient := bson.D{
 		{"user", userID},
 		{"name", data},
@@ -133,9 +137,13 @@ func InsertDataToIngredients(collection *mongo.Collection, userID interface{}, d
 	fmt.Println(result.InsertedID)
 }
 
-func RemoveManyFromIngredients(collection *mongo.Collection, userID interface{}, data string) int64 {
+func RemoveManyFromIngredients(collection *mongo.Collection, userHex string, data string) int64 {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
+	userID, err := primitive.ObjectIDFromHex(userHex)
+	if err != nil {
+		log.Fatal(err)
+	}
 	filter := bson.D{
 		{"user", userID},
 		{"name", data},
@@ -154,9 +162,13 @@ func RemoveManyFromIngredients(collection *mongo.Collection, userID interface{},
 	return result.DeletedCount
 }
 
-func ListDocuments(collection *mongo.Collection, userID interface{}) []Ingredient {
+func ListDocuments(collection *mongo.Collection, userHex string) []Ingredient {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
+	userID, err := primitive.ObjectIDFromHex(userHex)
+	if err != nil {
+		log.Fatal(err)
+	}
 	cursor, err := collection.Find(ctx, bson.M{"user": userID})
 	var results []Ingredient
 	if err != nil {
