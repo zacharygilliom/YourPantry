@@ -30,8 +30,8 @@ func main() {
 	pantryIngredient := database.NewCollection("ingredient", pantryDatabase)
 
 	//Get user info and either add user or return valid user
-	userData := database.GetUserInfo()
-	userID := database.InsertDataToUsers(pantryUser, userData)
+	//userData := database.GetUserInfo()
+	//userID := database.InsertDataToUsers(pantryUser, userData)
 
 	//routers
 	// Need to pass the userID as a paramater in the api that gets returned after the frontend calls the addUser endpoint.
@@ -39,14 +39,23 @@ func main() {
 	r.POST("/:userID/ingredients/add", addIngredient(pantryIngredient))
 	r.POST("/:userID/ingredients/remove", removeIngredient(pantryIngredient))
 	r.POST("/user/add", addUser(pantryUser))
+	r.GET("/login/:email/:password", loginUser(pantryUser))
 	//r.GET("/user/list/:firstName/:lastName/:email", listUsers())
 	r.GET("/:userID/ingredients/list", listIngredients(pantryIngredient, ctx, client))
 	//r.GET("/user/login", loginUser)
 	r.Run()
 }
 
-func loginUser() gin.HandlerFunc {
+func loginUser(collection *mongo.Collection) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
+		email := c.Param("email")
+		password := c.Param("password")
+		var users []string
+		users = database.GetUser(collection, email, password)
+		c.JSON(200, gin.H{
+			"message": "List of User's retrieved",
+			"data":    users,
+		})
 	}
 	return gin.HandlerFunc(fn)
 }
@@ -57,6 +66,7 @@ func addUser(collection *mongo.Collection) gin.HandlerFunc {
 			Firstname: c.Query("firstname"),
 			Lastname:  c.Query("lastname"),
 			Email:     c.Query("email"),
+			Password:  c.Query("password"),
 		}
 		newUserID := database.InsertDataToUsers(collection, newUser)
 		c.JSON(200, gin.H{
@@ -103,7 +113,7 @@ func removeIngredient(collection *mongo.Collection) gin.HandlerFunc {
 func listIngredients(collection *mongo.Collection, ctx context.Context, client *mongo.Client) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		userHex := c.Param("userID")
-		ingredList := database.ListDocuments(collection, userHex)
+		ingredList := database.ListIngredients(collection, userHex)
 		resultsMap := make(map[int]string)
 		for i, ing := range ingredList {
 			resultsMap[i] = ing.Name

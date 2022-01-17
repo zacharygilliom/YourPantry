@@ -19,7 +19,8 @@ type User struct {
 	ID        primitive.ObjectID `bson:"_id, omitempty"`
 	Firstname string             `bson:"firstname, omitempty"`
 	Lastname  string             `bson:"lastname, omitempty"`
-	Email     string             `bson:"email, omitempty"`
+	Email     string             `bson:"email"`
+	Password  string             `bson:"password"`
 }
 
 /*
@@ -80,7 +81,31 @@ func GetUserInfo() User {
 	NewUser.Firstname = "Zachary"
 	NewUser.Lastname = "Gilliom"
 	NewUser.Email = "zacharygilliom@gmail.com"
+	NewUser.Password = "123"
 	return NewUser
+}
+
+func GetUser(collection *mongo.Collection, email string, password string) []string {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	defer ctx.Done()
+	cursor, err := collection.Find(ctx,
+		bson.M{"email": email,
+			"password": password})
+	var mongoUser User
+	var emails []string
+	if err != nil {
+		log.Fatal(err)
+	}
+	for cursor.Next(ctx) {
+		err := cursor.Decode(&mongoUser)
+		if err != nil {
+			log.Fatal(err)
+		}
+		idString := mongoUser.ID.Hex()
+		emails = append(emails, idString)
+	}
+	return emails
 }
 
 func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface{} {
@@ -106,6 +131,7 @@ func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface
 			{"firstname", createdUser.Firstname},
 			{"lastname", createdUser.Lastname},
 			{"email", createdUser.Email},
+			{"password", createdUser.Password},
 		}
 		result, err := collection.InsertOne(ctx, data)
 		fmt.Println("User Added to Collection")
@@ -162,7 +188,7 @@ func RemoveManyFromIngredients(collection *mongo.Collection, userHex string, dat
 	return result.DeletedCount
 }
 
-func ListDocuments(collection *mongo.Collection, userHex string) []Ingredient {
+func ListIngredients(collection *mongo.Collection, userHex string) []Ingredient {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	userID, err := primitive.ObjectIDFromHex(userHex)
