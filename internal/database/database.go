@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -86,12 +87,17 @@ func GetUserInfo() User {
 }
 
 func GetUser(collection *mongo.Collection, email string, password string) []string {
+	//TODO: Need to compare the hashed password strored in the db to the password that is provided.
+	hashedPassword, err := hashPassword(password)
+	if err != nil {
+		log.Fatal(err)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer ctx.Done()
 	cursor, err := collection.Find(ctx,
 		bson.M{"email": email,
-			"password": password})
+			"password": hashedPassword})
 	var mongoUser User
 	var emails []string
 	if err != nil {
@@ -108,7 +114,22 @@ func GetUser(collection *mongo.Collection, email string, password string) []stri
 	return emails
 }
 
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func checkPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface{} {
+	hashedPassword, err := hashPassword(createdUser.Password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	createdUser.Password = hashedPassword
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer ctx.Done()

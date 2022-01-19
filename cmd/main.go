@@ -29,10 +29,6 @@ func main() {
 	pantryUser := database.NewCollection("user", pantryDatabase)
 	pantryIngredient := database.NewCollection("ingredient", pantryDatabase)
 
-	//Get user info and either add user or return valid user
-	//userData := database.GetUserInfo()
-	//userID := database.InsertDataToUsers(pantryUser, userData)
-
 	//routers
 	// Need to pass the userID as a paramater in the api that gets returned after the frontend calls the addUser endpoint.
 	r := gin.Default()
