@@ -36,9 +36,7 @@ func main() {
 	r.POST("/:userID/ingredients/remove", removeIngredient(pantryIngredient))
 	r.POST("/user/add", addUser(pantryUser))
 	r.GET("/login/:email/:password", loginUser(pantryUser))
-	//r.GET("/user/list/:firstName/:lastName/:email", listUsers())
 	r.GET("/:userID/ingredients/list", listIngredients(pantryIngredient, ctx, client))
-	//r.GET("/user/login", loginUser)
 	r.Run()
 }
 
@@ -77,6 +75,7 @@ func addIngredient(collection *mongo.Collection) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		ingredient := c.Query("ingredient")
 		userHex := c.Param("userID")
+		fmt.Println(userHex)
 		database.InsertDataToIngredients(collection, userHex, ingredient)
 		c.JSON(200, gin.H{
 			"message": "Ingredient added",

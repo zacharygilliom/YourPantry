@@ -87,17 +87,11 @@ func GetUserInfo() User {
 }
 
 func GetUser(collection *mongo.Collection, email string, password string) []string {
-	//TODO: Need to compare the hashed password strored in the db to the password that is provided.
-	hashedPassword, err := hashPassword(password)
-	if err != nil {
-		log.Fatal(err)
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer ctx.Done()
 	cursor, err := collection.Find(ctx,
-		bson.M{"email": email,
-			"password": hashedPassword})
+		bson.M{"email": email})
 	var mongoUser User
 	var emails []string
 	if err != nil {
@@ -109,7 +103,9 @@ func GetUser(collection *mongo.Collection, email string, password string) []stri
 			log.Fatal(err)
 		}
 		idString := mongoUser.ID.Hex()
-		emails = append(emails, idString)
+		if checkPasswordHash(password, mongoUser.Password) {
+			emails = append(emails, idString)
+		}
 	}
 	return emails
 }
@@ -169,6 +165,7 @@ func InsertDataToIngredients(collection *mongo.Collection, userHex string, data 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	userID, err := primitive.ObjectIDFromHex(userHex)
+	fmt.Println(userID)
 	if err != nil {
 		log.Fatal(err)
 	}
