@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/zacharygilliom/internal/database"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -32,6 +33,7 @@ func main() {
 	//routers
 	// Need to pass the userID as a paramater in the api that gets returned after the frontend calls the addUser endpoint.
 	r := gin.Default()
+	r.Use(cors.Default())
 	r.POST("/:userID/ingredients/add", addIngredient(pantryIngredient))
 	r.POST("/:userID/ingredients/remove", removeIngredient(pantryIngredient))
 	r.POST("/user/add", addUser(pantryUser))
@@ -108,11 +110,13 @@ func removeIngredient(collection *mongo.Collection) gin.HandlerFunc {
 func listIngredients(collection *mongo.Collection, ctx context.Context, client *mongo.Client) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		userHex := c.Param("userID")
-		ingredList := database.ListIngredients(collection, userHex)
-		resultsMap := make(map[int]string)
-		for i, ing := range ingredList {
-			resultsMap[i] = ing.Name
+		ingredientCollectionList := database.ListIngredients(collection, userHex)
+		resultsMap := make(map[string][]string)
+		var ingredList []string
+		for _, ing := range ingredientCollectionList {
+			ingredList = append(ingredList, ing.Name)
 		}
+		resultsMap["ingredients"] = ingredList
 		if len(resultsMap) == 0 {
 			res, err := database.PingClient(ctx, client)
 			if err != nil {
