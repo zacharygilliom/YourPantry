@@ -161,16 +161,16 @@ func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface
 	}
 }
 
-func InsertDataToIngredients(collection *mongo.Collection, userHex string, data string) {
+func InsertDataToIngredients(collection *mongo.Collection, userHex interface{}, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	userID, err := primitive.ObjectIDFromHex(userHex)
-	fmt.Println(userID)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//userID, err := primitive.ObjectIDFromHex(userHex)
+	//fmt.Println(userID)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	ingredient := bson.D{
-		{"user", userID},
+		{"user", userHex},
 		{"name", data},
 	}
 	result, err := collection.InsertOne(ctx, ingredient)
@@ -181,15 +181,15 @@ func InsertDataToIngredients(collection *mongo.Collection, userHex string, data 
 	fmt.Println(result.InsertedID)
 }
 
-func RemoveManyFromIngredients(collection *mongo.Collection, userHex string, data string) int64 {
+func RemoveManyFromIngredients(collection *mongo.Collection, userHex interface{}, data string) int64 {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	userID, err := primitive.ObjectIDFromHex(userHex)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//userID, err := primitive.ObjectIDFromHex(userHex)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	filter := bson.D{
-		{"user", userID},
+		{"user", userHex},
 		{"name", data},
 	}
 	result, err := collection.DeleteMany(ctx, filter)
@@ -206,14 +206,15 @@ func RemoveManyFromIngredients(collection *mongo.Collection, userHex string, dat
 	return result.DeletedCount
 }
 
-func ListIngredients(collection *mongo.Collection, userHex string) []Ingredient {
+func ListIngredients(collection *mongo.Collection, userHex interface{}) []Ingredient {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	userID, err := primitive.ObjectIDFromHex(userHex)
-	if err != nil {
-		log.Fatal(err)
-	}
-	cursor, err := collection.Find(ctx, bson.M{"user": userID})
+	//fmt.Println(userHex)
+	//userID, err := primitive.ObjectIDFromHex(userHex)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	cursor, err := collection.Find(ctx, bson.M{"user": userHex})
 	var results []Ingredient
 	if err != nil {
 		log.Fatal(err)
