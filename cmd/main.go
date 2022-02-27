@@ -20,7 +20,7 @@ const (
 	userkey = "user"
 )
 
-type HandlerA struct {
+type Connection struct {
 	pUser       *mongo.Collection
 	pIngredient *mongo.Collection
 }
@@ -43,30 +43,28 @@ func main() {
 	pantryUser := database.NewCollection("user", pantryDatabase)
 	pantryIngredient := database.NewCollection("ingredient", pantryDatabase)
 
-	Obj := new(HandlerA)
-	Obj.pUser = pantryUser
-	Obj.pIngredient = pantryIngredient
+	db := new(Connection)
+	db.pUser = pantryUser
+	db.pIngredient = pantryIngredient
 
-	//routers
-	// Need to pass the userID as a paramater in the api that gets returned after the frontend calls the addUser endpoint.
-	r := engine(Obj)
-	r.Use(cors.Default())
-	r.Use(gin.Logger())
+	r := engine(db)
 	r.Run()
 }
 
-func engine(Obj *HandlerA) *gin.Engine {
+func engine(db *Connection) *gin.Engine {
 	r := gin.New()
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
-	r.GET("/login/:email/:password", Obj.loginUser)
+	r.Use(cors.Default())
+	//r.Use(gin.Logger())
+	r.POST("/login", db.loginUser)
 
 	private := r.Group("/user")
 	private.Use(AuthRequired)
 	{
-		private.POST("/ingredients/add", Obj.addIngredient)
-		private.POST("/ingredients/remove", Obj.removeIngredient)
-		private.GET("/ingredients/list", Obj.listIngredients)
+		private.POST("/ingredients/add", db.addIngredient)
+		private.POST("/ingredients/remove", db.removeIngredient)
+		private.GET("/ingredients/list", db.listIngredients)
 	}
 
 	//r.POST("/:userID/ingredients/add", addIngredient(pantryIngredient))
@@ -86,17 +84,15 @@ func AuthRequired(c *gin.Context) {
 	c.Next()
 }
 
-func (this *HandlerA) loginUser(c *gin.Context) {
+func (this *Connection) loginUser(c *gin.Context) {
 	session := sessions.Default(c)
 	collection := this.pUser
-	email := c.Param("email")
-	password := c.Param("password")
+	email := c.Query("email")
+	password := c.Query("password")
 	var users []string
 	users = database.GetUser(collection, email, password)
 	if len(users) > 1 {
-		c.JSON(200, gin.H{"message": "Multiple Users Retrieved",
-			"data": users,
-		})
+		c.JSON(200, gin.H{"message": "Multiple Users Retrieved"})
 		return
 	}
 	userHex, _ := primitive.ObjectIDFromHex(users[0])
@@ -106,9 +102,8 @@ func (this *HandlerA) loginUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
 		return
 	}
-	c.JSON(200, gin.H{
-		"message": "Successfully authenticated user",
-	})
+	c.String(http.StatusOK, "authenticated user")
+
 }
 
 /*
@@ -129,7 +124,7 @@ func addUser(collection *mongo.Collection) gin.HandlerFunc {
 	return gin.HandlerFunc(fn)
 }
 */
-func (this *HandlerA) addIngredient(c *gin.Context) {
+func (this *Connection) addIngredient(c *gin.Context) {
 	session := sessions.Default(c)
 	userHex := session.Get(userkey)
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
@@ -138,15 +133,13 @@ func (this *HandlerA) addIngredient(c *gin.Context) {
 	}
 	collection := this.pIngredient
 	ingredient := c.Query("ingredient")
-	//userHex := c.Param("userID")
-	//fmt.Println(userHex)
 	database.InsertDataToIngredients(collection, userID, ingredient)
 	c.JSON(200, gin.H{
 		"message": "Ingredient added",
 	})
 }
 
-func (this *HandlerA) removeIngredient(c *gin.Context) {
+func (this *Connection) removeIngredient(c *gin.Context) {
 	session := sessions.Default(c)
 	userHex := session.Get(userkey)
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
@@ -171,7 +164,7 @@ func (this *HandlerA) removeIngredient(c *gin.Context) {
 	}
 }
 
-func (this *HandlerA) listIngredients(c *gin.Context) {
+func (this *Connection) listIngredients(c *gin.Context) {
 	session := sessions.Default(c)
 	userHex := session.Get(userkey)
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
