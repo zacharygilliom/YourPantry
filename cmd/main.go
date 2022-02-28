@@ -25,6 +25,11 @@ type Connection struct {
 	pIngredient *mongo.Collection
 }
 
+type userPOST struct {
+	Email    string `json: "email"`
+	Password string `json: "password"`
+}
+
 func main() {
 	//Connect to database
 	fmt.Println("Connection Started...")
@@ -52,7 +57,7 @@ func main() {
 }
 
 func engine(db *Connection) *gin.Engine {
-	r := gin.New()
+	r := gin.Default()
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 	r.Use(cors.Default())
@@ -86,13 +91,16 @@ func AuthRequired(c *gin.Context) {
 
 func (this *Connection) loginUser(c *gin.Context) {
 	session := sessions.Default(c)
+	postedUser := &userPOST{}
+	c.Bind(&postedUser)
 	collection := this.pUser
-	email := c.Query("email")
-	password := c.Query("password")
 	var users []string
-	users = database.GetUser(collection, email, password)
+	users = database.GetUser(collection, postedUser.Email, postedUser.Password)
 	if len(users) > 1 {
 		c.JSON(200, gin.H{"message": "Multiple Users Retrieved"})
+		return
+	} else if len(users) == 0 {
+		c.JSON(200, gin.H{"message": "No users retrieved"})
 		return
 	}
 	userHex, _ := primitive.ObjectIDFromHex(users[0])
@@ -102,7 +110,7 @@ func (this *Connection) loginUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
 		return
 	}
-	c.String(http.StatusOK, "authenticated user")
+	c.JSON(200, gin.H{"message": "authenticated user"})
 
 }
 

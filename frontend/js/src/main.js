@@ -1,3 +1,6 @@
+let signUpForm = document.getElementById('sign-up-form');
+let loginForm = document.getElementById('login-form');
+
 async function fetchIngredList() {
 	try {
 		let response =  await fetch('http://localhost:8080/61ece6d2e84c62bdcdbcc42d/ingredients/list');
@@ -26,42 +29,25 @@ async function signUpUser() {
 		console.log(error);
 	}
 }
-/*
-async function loginUser() {
+
+loginForm.addEventListener('submit', function(event) {
+	loginUser(event);
+});
+async function loginUser(event) {
 	try {
-		//username = document.getElementById('login-email').value;
-		//password = document.getElementById('login-password').value;
-		//console.log(username);
-		//console.log(password);
-		let response = await fetch('http://localhost:8080/login?email=zacharygilliom@gmail.com&password=Penguin5');
-		console.log(response);
+		event.preventDefault();
+		username = document.getElementById('login-email').value;
+		pass = document.getElementById('login-password').value;
+		let userData = {email:username, password:pass};
+		const requestOption = {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(userData)
+		};
+		let response = await fetch('http://localhost:8080/login', requestOption);
 		let data = await response.json();
 		console.log(data);
 	} catch (error) {
 		console.log(error);
 	}
 }
-*/
-function loginUser() {
-	fetch("http://localhost:8080/login?email=zacharygilliom@gmail.com&password=Penguin5")
-	.then(response => {
-		console.log(response);
-	})
-	.catch(error => {
-		console.log(error);
-	})
-}
-async function autoLoginUser() {
-	try {
-		let response = await fetch('http://localhost:8080/login?email=zacharygilliom@gmail.com&password=Penguin5');
-		console.log(response);
-		let data = await response.json();
-		console.log(data);
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-
-//autoLoginUser()
-
