@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -27,15 +26,15 @@ type Connection struct {
 }
 
 type userPOST struct {
-	email    string `json: "email"`
-	password string `json: "password"`
+	Email    string `json: "email"`
+	Password string `json: "password"`
 }
 
 type newUserPOST struct {
-	email     string `json: "email"`
-	password  string `json: "password"`
-	firstname string `json: "first_name"`
-	lastname  string `json: "last_name"`
+	Email     string `json: "email"`
+	Password  string `json: "password"`
+	Firstname string `json: "firstname"`
+	Lastname  string `json: "lastname"`
 }
 
 func main() {
@@ -97,13 +96,16 @@ func (db *Connection) signUpUser(c *gin.Context) {
 	session := sessions.Default(c)
 	//data, _ := ioutil.ReadAll(c.Request.Body)
 	//fmt.Printf("%v", string(data))
-	newUser := &newUserPOST{}
-	c.Bind(&newUser)
-	fmt.Println(newUser.email)
+	newUser := newUserPOST{}
+	err := c.BindJSON(&newUser)
+	if err != nil {
+		c.AbortWithError(400, err)
+	}
+	//fmt.Println(newUser)
 	collection := db.pUser
 	var userID interface{}
-	userID = database.InsertDataToUsers(collection, newUser.email, newUser.password, newUser.firstname, newUser.lastname)
-	session.Set(userkey, userID)
+	userID = database.InsertDataToUsers(collection, newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
+	session.Set(userkey, userID.(primitive.ObjectID).Hex())
 	if err := session.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
 		return
@@ -114,14 +116,15 @@ func (db *Connection) signUpUser(c *gin.Context) {
 
 func (db *Connection) loginUser(c *gin.Context) {
 	session := sessions.Default(c)
-	postedUser := &userPOST{}
-	d, _ := ioutil.ReadAll(c.Request.Body)
-	fmt.Printf("%v", string(d))
-	c.Bind(&postedUser)
-	fmt.Println(postedUser.email)
+	postedUser := userPOST{}
+	err := c.BindJSON(&postedUser)
+	if err != nil {
+		c.AbortWithError(400, err)
+	}
+	fmt.Println(postedUser.Email)
 	collection := db.pUser
 	var users []string
-	users = database.GetUser(collection, postedUser.email, postedUser.password)
+	users = database.GetUser(collection, postedUser.Email, postedUser.Password)
 	if len(users) > 1 {
 		c.JSON(200, gin.H{"message": "Multiple Users Retrieved",
 			"data": 0})
@@ -133,6 +136,7 @@ func (db *Connection) loginUser(c *gin.Context) {
 	}
 	userHex, _ := primitive.ObjectIDFromHex(users[0])
 	userID := userHex.Hex()
+	fmt.Println(userID)
 	session.Set(userkey, userID)
 	if err := session.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})

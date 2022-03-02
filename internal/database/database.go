@@ -126,6 +126,7 @@ func InsertDataToUsers(collection *mongo.Collection, email, password, fname, lna
 		log.Fatal(err)
 	}
 	password = hashedPassword
+	fmt.Println(email, password, fname, lname)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer ctx.Done()

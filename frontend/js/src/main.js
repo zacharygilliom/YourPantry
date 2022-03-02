@@ -28,7 +28,7 @@ async function signUpUser(event) {
 		pass = document.getElementById('sign-up-password').value;
 		fname = document.getElementById('sign-up-fname').value;
 		lname = document.getElementById('sign-up-lname').value;
-		let userData = {email:username, password:pass, first_name: fname, last_name:lname};
+		let userData = {email:username, password:pass, firstname: fname, lastname:lname};
 		console.log(userData);
 		const requestOption = {
 			method: 'POST',
