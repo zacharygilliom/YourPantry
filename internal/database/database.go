@@ -120,16 +120,16 @@ func checkPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface{} {
-	hashedPassword, err := hashPassword(createdUser.Password)
+func InsertDataToUsers(collection *mongo.Collection, email, password, fname, lname string) interface{} {
+	hashedPassword, err := hashPassword(password)
 	if err != nil {
 		log.Fatal(err)
 	}
-	createdUser.Password = hashedPassword
+	password = hashedPassword
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer ctx.Done()
-	cursor, err := collection.Find(ctx, bson.M{"email": createdUser.Email})
+	cursor, err := collection.Find(ctx, bson.M{"email": email})
 	var mongoUser User
 	var userCheck string
 	if err != nil {
@@ -145,10 +145,10 @@ func InsertDataToUsers(collection *mongo.Collection, createdUser User) interface
 	}
 	if userCheck == "" {
 		data := bson.D{
-			{"firstname", createdUser.Firstname},
-			{"lastname", createdUser.Lastname},
-			{"email", createdUser.Email},
-			{"password", createdUser.Password},
+			{"firstname", fname},
+			{"lastname", lname},
+			{"email", email},
+			{"password", password},
 		}
 		result, err := collection.InsertOne(ctx, data)
 		fmt.Println("User Added to Collection")

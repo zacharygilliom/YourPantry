@@ -18,13 +18,30 @@ async function fetchIngredList() {
 		console.log(error);
 	}
 }
-
-async function signUpUser() {
+signUpForm.addEventListener('submit', function(event) {
+	signUpUser(event);
+});
+async function signUpUser(event) {
 	try {
-		//username = document.getElementById('sign-up-email').value;	
-		//password = document.getElementById('sign-up-password').value;
-		let response = await fetch('http://localhost:8080/user/zacharygilliom@gmail.com/Penguin5');
+		event.preventDefault();
+		username = document.getElementById('sign-up-email').value;	
+		pass = document.getElementById('sign-up-password').value;
+		fname = document.getElementById('sign-up-fname').value;
+		lname = document.getElementById('sign-up-lname').value;
+		let userData = {email:username, password:pass, first_name: fname, last_name:lname};
+		console.log(userData);
+		const requestOption = {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(userData)
+	};
+		let response = await fetch('http://localhost:8080/sign-up', requestOption);
 		let data = await response.json();
+		console.log(data);
+		if (data["data"] == 1) {
+			window.location.replace("home.html");
+			return false
+		}
 	} catch (error) {
 		console.log(error);
 	}
@@ -47,6 +64,13 @@ async function loginUser(event) {
 		let response = await fetch('http://localhost:8080/login', requestOption);
 		let data = await response.json();
 		console.log(data);
+		if (data["data"] == 0) {
+			alert("Login Not Successful: Please Try Again");
+			//location.reload();
+		} else if (data["data"] == 1) {
+			window.location.replace("home.html");
+			return false;
+		}
 	} catch (error) {
 		console.log(error);
 	}
