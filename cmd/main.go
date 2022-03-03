@@ -94,14 +94,11 @@ func AuthRequired(c *gin.Context) {
 
 func (db *Connection) signUpUser(c *gin.Context) {
 	session := sessions.Default(c)
-	//data, _ := ioutil.ReadAll(c.Request.Body)
-	//fmt.Printf("%v", string(data))
 	newUser := newUserPOST{}
 	err := c.BindJSON(&newUser)
 	if err != nil {
 		c.AbortWithError(400, err)
 	}
-	//fmt.Println(newUser)
 	collection := db.pUser
 	var userID interface{}
 	userID = database.InsertDataToUsers(collection, newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
