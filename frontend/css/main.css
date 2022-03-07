@@ -1,6 +1,42 @@
+:root {
+	--border-color: #DCDCDC;
+}
+
 .sign-up-login{
 	margin: auto;
 	width: 20%;	
 	text-align: center;
-	border: 3px blue;
+	border: 1px solid #ADD8E6;
+	border-radius:5px;
+}
+#ingredient-container {
+	margin: auto;
+	width: 99%;
+}
+
+#flex-container {
+	display:flex;
+	justify-content:space-between;
+}
+
+#ingredient-changer {
+	width: 50%;
+	border:1px solid var(--border-color);
+	border-radius:5px;
+	text-align:center;
+}
+
+#ingredient-list {
+	flex-grow:1;
+	border:1px solid var(--border-color);
+	border-radius:5px;
+	text-align: center;
+}
+
+#ingredient-greeter{
+	margin: auto;
+	text-align: center;
+	width: 99%;
+	border:1px solid var(--border-color);
+	border-radius:5px;
 }

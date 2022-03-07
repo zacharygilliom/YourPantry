@@ -1,6 +1,14 @@
 let signUpForm = document.getElementById('sign-up-form');
 let loginForm = document.getElementById('login-form');
 
+loginForm.addEventListener('submit', function(event) {
+	loginUser(event);
+});
+
+signUpForm.addEventListener('submit', function(event) {
+	signUpUser(event);
+});
+
 async function fetchIngredList() {
 	try {
 		let response =  await fetch('http://localhost:8080/61ece6d2e84c62bdcdbcc42d/ingredients/list');
@@ -18,9 +26,7 @@ async function fetchIngredList() {
 		console.log(error);
 	}
 }
-signUpForm.addEventListener('submit', function(event) {
-	signUpUser(event);
-});
+
 async function signUpUser(event) {
 	try {
 		event.preventDefault();
@@ -29,7 +35,7 @@ async function signUpUser(event) {
 		fname = document.getElementById('sign-up-fname').value;
 		lname = document.getElementById('sign-up-lname').value;
 		let userData = {email:username, password:pass, firstname: fname, lastname:lname};
-		console.log(userData);
+		//console.log(userData);
 		const requestOption = {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
@@ -37,7 +43,7 @@ async function signUpUser(event) {
 	};
 		let response = await fetch('http://localhost:8080/sign-up', requestOption);
 		let data = await response.json();
-		console.log(data);
+		//console.log(data);
 		if (data["data"] == 1) {
 			window.location.replace("home.html");
 			return false
@@ -47,9 +53,6 @@ async function signUpUser(event) {
 	}
 }
 
-loginForm.addEventListener('submit', function(event) {
-	loginUser(event);
-});
 async function loginUser(event) {
 	try {
 		event.preventDefault();
@@ -63,7 +66,7 @@ async function loginUser(event) {
 		};
 		let response = await fetch('http://localhost:8080/login', requestOption);
 		let data = await response.json();
-		console.log(data);
+		//console.log(data);
 		if (data["data"] == 0) {
 			alert("Login Not Successful: Please Try Again");
 			//location.reload();
