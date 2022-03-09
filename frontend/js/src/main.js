@@ -1,13 +1,19 @@
-let signUpForm = document.getElementById('sign-up-form');
-let loginForm = document.getElementById('login-form');
-
-loginForm.addEventListener('submit', function(event) {
-	loginUser(event);
-});
-
-signUpForm.addEventListener('submit', function(event) {
-	signUpUser(event);
-});
+function ingredients() {
+	let quickAddForm = document.getElementById('quick-add-form');
+	quickAddForm.addEventListener('submit', function(event) {
+		quickAddIngredient(event);
+	});
+}
+function landing() {
+	let signUpForm = document.getElementById('sign-up-form');
+	let loginForm = document.getElementById('login-form');
+	loginForm.addEventListener('submit', function(event) {
+		loginUser(event);
+	});
+	signUpForm.addEventListener('submit', function(event) {
+		signUpUser(event);
+	});
+}
 
 async function fetchIngredList() {
 	try {
@@ -74,6 +80,25 @@ async function loginUser(event) {
 			window.location.replace("home.html");
 			return false;
 		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function quickAddIngredient(event) {
+	try {
+		event.preventDefault();
+		ingredient = document.getElementById('Ingredient-selection').value;
+		let userData = {ingredient:ingredient};
+		const requestOption = {
+			method:'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(userData)
+		};
+		console.log(userData);
+		let response = await fetch('http://localhost:8080/user/ingredients/add', requestOption);
+		let data = await response.json();
+		console.log(data);
 	} catch (error) {
 		console.log(error);
 	}

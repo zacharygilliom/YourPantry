@@ -37,6 +37,10 @@ type newUserPOST struct {
 	Lastname  string `json:"lastname"`
 }
 
+type userIngredient struct {
+	Ingredient string `json:"ingredient"`
+}
+
 func main() {
 	//Connect to database
 	fmt.Println("Connection Started...")
@@ -55,6 +59,7 @@ func main() {
 	pantryUser := database.NewCollection("user", pantryDatabase)
 	pantryIngredient := database.NewCollection("ingredient", pantryDatabase)
 
+	//Create instance of our database connection and run our engine
 	db := new(Connection)
 	db.pUser = pantryUser
 	db.pIngredient = pantryIngredient
@@ -65,15 +70,20 @@ func main() {
 
 func engine(db *Connection) *gin.Engine {
 	r := gin.Default()
+	//set new cookie store and new session
 	store := cookie.NewStore([]byte("secret"))
+	store.Options(sessions.Options{MaxAge: 60 * 60 * 24,
+		Path: "/"})
 	r.Use(sessions.Sessions("mysession", store))
 	r.Use(cors.Default())
 	r.Use(gin.Logger())
+
+	//endpoints to login or create account
 	r.POST("/login", db.loginUser)
 	r.POST("/sign-up", db.signUpUser)
 
 	private := r.Group("/user")
-	private.Use(AuthRequired)
+	private.Use(AuthRequired())
 	{
 		private.POST("/ingredients/add", db.addIngredient)
 		private.POST("/ingredients/remove", db.removeIngredient)
@@ -82,14 +92,16 @@ func engine(db *Connection) *gin.Engine {
 	return r
 }
 
-func AuthRequired(c *gin.Context) {
-	session := sessions.Default(c)
-	user := session.Get(userkey)
-	if user == nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
+func AuthRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		user := session.Get("user")
+		if user == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+		c.Next()
 	}
-	c.Next()
 }
 
 func (db *Connection) signUpUser(c *gin.Context) {
@@ -102,8 +114,9 @@ func (db *Connection) signUpUser(c *gin.Context) {
 	collection := db.pUser
 	var userID interface{}
 	userID = database.InsertDataToUsers(collection, newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
-	session.Set(userkey, userID.(primitive.ObjectID).Hex())
+	session.Set("user", userID.(primitive.ObjectID).Hex())
 	if err := session.Save(); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
 		return
 	}
@@ -112,13 +125,14 @@ func (db *Connection) signUpUser(c *gin.Context) {
 }
 
 func (db *Connection) loginUser(c *gin.Context) {
+	//Get session and bind POSTED JSON data to posteduser struct
 	session := sessions.Default(c)
 	postedUser := userPOST{}
 	err := c.BindJSON(&postedUser)
 	if err != nil {
 		c.AbortWithError(400, err)
 	}
-	fmt.Println(postedUser.Email)
+	//send user info to getuser func to retrieve users based on email and password
 	collection := db.pUser
 	var users []string
 	users = database.GetUser(collection, postedUser.Email, postedUser.Password)
@@ -131,10 +145,11 @@ func (db *Connection) loginUser(c *gin.Context) {
 			"data": 0})
 		return
 	}
+	//set userID as the session "user" variable
 	userHex, _ := primitive.ObjectIDFromHex(users[0])
 	userID := userHex.Hex()
-	fmt.Println(userID)
-	session.Set(userkey, userID)
+	session.Set("user", userID)
+	c.Set("user", userID)
 	if err := session.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
 		return
@@ -144,15 +159,22 @@ func (db *Connection) loginUser(c *gin.Context) {
 }
 
 func (db *Connection) addIngredient(c *gin.Context) {
+	//get session and get user id variable
 	session := sessions.Default(c)
-	userHex := session.Get(userkey)
+	userHex := session.Get("user")
+	userIng := userIngredient{}
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)
 	}
+	// set POSTED data to new ingredient
+	err = c.BindJSON(&userIng)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//pass new ingredient to database to add it based on the user in the session
 	collection := db.pIngredient
-	ingredient := c.Query("ingredient")
-	database.InsertDataToIngredients(collection, userID, ingredient)
+	database.InsertDataToIngredients(collection, userID, userIng.Ingredient)
 	c.JSON(200, gin.H{
 		"message": "Ingredient added",
 	})
@@ -160,7 +182,7 @@ func (db *Connection) addIngredient(c *gin.Context) {
 
 func (db *Connection) removeIngredient(c *gin.Context) {
 	session := sessions.Default(c)
-	userHex := session.Get(userkey)
+	userHex := session.Get("user")
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)
@@ -185,7 +207,8 @@ func (db *Connection) removeIngredient(c *gin.Context) {
 
 func (db *Connection) listIngredients(c *gin.Context) {
 	session := sessions.Default(c)
-	userHex := session.Get(userkey)
+	userHex := session.Get("user")
+	//userHex, _ := c.Get("user")
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)

@@ -26,6 +26,11 @@
 	text-align:center;
 }
 
+#ingredient-quick-add {
+	width:65%;
+	margin:auto;
+}
+
 #ingredient-list {
 	flex-grow:1;
 	border:1px solid var(--border-color);

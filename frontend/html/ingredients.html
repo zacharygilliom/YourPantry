@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="../css/main.css">
 
 	</head>
-	<body>
+	<body onload='ingredients()'>
 		<div class='top-banner'>
 			<nav class="navbar navbar-expand-lg navbar-light bg-light">
   				<div class="container-fluid">
@@ -36,9 +36,9 @@
 						</div>
 						<div id='ingredient-changer-quick-add'>
 							<div id='ingredient-quick-add'>
-								<form>
+								<form id='quick-add-form'>
 								  <div class="form-group row">
-								    <label for="Ingredient-selection" class="col-sm-5 col-form-label">Ingredient Quick Add</label>
+								    <label for="Ingredient-selection" class="col-sm-4 col-form-label">Ingredient Quick Add</label>
 								    <div class="col-sm-5">
 								    <select class="form-control form-select" id="Ingredient-selection">
 									    <option>Flour</option>
