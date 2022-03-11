@@ -13,10 +13,10 @@ import (
 )
 
 type Connection struct {
-	db *database.DB
+	DB *database.DB
 }
 
-func (conn *Connection) signUpUser(c *gin.Context) {
+func (conn *Connection) SignUpUser(c *gin.Context) {
 	session := sessions.Default(c)
 	newUser := models.NewUserPOST{}
 	err := c.BindJSON(&newUser)
@@ -24,7 +24,7 @@ func (conn *Connection) signUpUser(c *gin.Context) {
 		c.AbortWithError(400, err)
 	}
 	var userID interface{}
-	userID = conn.db.InsertDataToUsers(newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
+	userID = conn.DB.InsertDataToUsers(newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
 	session.Set("user", userID.(primitive.ObjectID).Hex())
 	if err := session.Save(); err != nil {
 		fmt.Println(err)
@@ -35,7 +35,7 @@ func (conn *Connection) signUpUser(c *gin.Context) {
 		"data": 1})
 }
 
-func (conn *Connection) loginUser(c *gin.Context) {
+func (conn *Connection) LoginUser(c *gin.Context) {
 	//Get session and bind POSTED JSON data to posteduser struct
 	session := sessions.Default(c)
 	postedUser := models.UserPOST{}
@@ -45,7 +45,7 @@ func (conn *Connection) loginUser(c *gin.Context) {
 	}
 	//send user info to getuser func to retrieve users based on email and password
 	var users []string
-	users = conn.db.GetUser(postedUser.Email, postedUser.Password)
+	users = conn.DB.GetUser(postedUser.Email, postedUser.Password)
 	if len(users) > 1 {
 		c.JSON(200, gin.H{"message": "Multiple Users Retrieved",
 			"data": 0})
@@ -68,7 +68,7 @@ func (conn *Connection) loginUser(c *gin.Context) {
 		"data": 1})
 }
 
-func (conn *Connection) addIngredient(c *gin.Context) {
+func (conn *Connection) AddIngredient(c *gin.Context) {
 	//get session and get user id variable
 	session := sessions.Default(c)
 	userHex := session.Get("user")
@@ -87,13 +87,13 @@ func (conn *Connection) addIngredient(c *gin.Context) {
 	}
 	//pass new ingredient to database to add it based on the user in the session
 	//collection := conn.db.Ingredient
-	conn.db.InsertDataToIngredients(userID, userIngredient.Ingredient)
+	conn.DB.InsertDataToIngredients(userID, userIngredient.Ingredient)
 	c.JSON(200, gin.H{
 		"message": "Ingredient added",
 	})
 }
 
-func (conn *Connection) removeIngredient(c *gin.Context) {
+func (conn *Connection) RemoveIngredient(c *gin.Context) {
 	session := sessions.Default(c)
 	userHex := session.Get("user")
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
@@ -102,7 +102,7 @@ func (conn *Connection) removeIngredient(c *gin.Context) {
 	}
 	//collection := conn.db.Ingredient
 	ingredient := c.Query("ingredient")
-	ingsRemoved := conn.db.RemoveManyFromIngredients(userID, ingredient)
+	ingsRemoved := conn.DB.RemoveManyFromIngredients(userID, ingredient)
 	data := map[int64]string{ingsRemoved: ingredient}
 	if ingsRemoved > 0 {
 		c.JSON(200, gin.H{
@@ -117,7 +117,7 @@ func (conn *Connection) removeIngredient(c *gin.Context) {
 	}
 }
 
-func (conn *Connection) listIngredients(c *gin.Context) {
+func (conn *Connection) ListIngredients(c *gin.Context) {
 	session := sessions.Default(c)
 	userHex := session.Get("user")
 	//userHex, _ := c.Get("user")
@@ -125,9 +125,9 @@ func (conn *Connection) listIngredients(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := conn.db.Ingredient
+	//collection := conn.db.Ingredient
 	//userHex := c.Param("userID")
-	ingredientCollectionList := database.ListIngredients(collection, userID)
+	ingredientCollectionList := conn.DB.ListIngredients(userID)
 	resultsMap := make(map[string][]string)
 	var ingredList []string
 	for _, ing := range ingredientCollectionList {

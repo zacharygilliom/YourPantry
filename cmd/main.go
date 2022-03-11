@@ -7,7 +7,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/zacharygilliom/internal/controllers"
 	"github.com/zacharygilliom/internal/database"
+	"github.com/zacharygilliom/internal/jwt"
 )
 
 const (
@@ -40,15 +42,15 @@ func main() {
 	defer cancel()
 
 	//Initialize our database and collections
-	var db database.DB
-	db, err = database.Init(ctx)
+	db, err := database.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//Create instance of our database connection and run our engine
-
-	r := engine(db)
+	var conn *controllers.Connection
+	conn.DB = db
+	r := engine(conn.DB)
 	r.Run()
 }
 
@@ -58,15 +60,20 @@ func engine(db *database.DB) *gin.Engine {
 	r.Use(cors.Default())
 	r.Use(gin.Logger())
 
+	authMiddleware, err := jwt.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	//endpoints to login or create account
-	r.POST("/login", db.loginUser)
-	r.POST("/sign-up", db.signUpUser)
+	r.POST("/login", authMiddleware.LoginHandler)
+	r.POST("/sign-up", db.SignUpUser)
 
 	private := r.Group("/user")
 	{
-		private.POST("/ingredients/add", db.addIngredient)
-		private.POST("/ingredients/remove", db.removeIngredient)
-		private.GET("/ingredients/list", db.listIngredients)
+		private.POST("/ingredients/add", db.AddIngredient)
+		private.POST("/ingredients/remove", db.RemoveIngredient)
+		private.GET("/ingredients/list", db.ListIngredients)
 	}
 	return r
 }

@@ -20,7 +20,7 @@ type login struct {
 	Password string `json:"password"`
 }
 
-func Init() {
+func Init() (*jwt.GinJWTMiddleware, error) {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte("secret"),
@@ -66,4 +66,5 @@ func Init() {
 			return nil, jwt.ErrFailedAuthentication
 		},
 	})
+	return authMiddleware, err
 }
