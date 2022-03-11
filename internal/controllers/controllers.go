@@ -7,20 +7,24 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/zacharygilliom/internal/database"
+	database "github.com/zacharygilliom/internal/database"
+	"github.com/zacharygilliom/internal/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func signUpUser(c *gin.Context) {
+type Connection struct {
+	db *database.DB
+}
+
+func (conn *Connection) signUpUser(c *gin.Context) {
 	session := sessions.Default(c)
-	newUser := newUserPOST{}
+	newUser := models.NewUserPOST{}
 	err := c.BindJSON(&newUser)
 	if err != nil {
 		c.AbortWithError(400, err)
 	}
-	collection := db.User
 	var userID interface{}
-	userID = database.InsertDataToUsers(collection, newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
+	userID = conn.db.InsertDataToUsers(newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
 	session.Set("user", userID.(primitive.ObjectID).Hex())
 	if err := session.Save(); err != nil {
 		fmt.Println(err)
@@ -31,18 +35,17 @@ func signUpUser(c *gin.Context) {
 		"data": 1})
 }
 
-func (db *Connection) loginUser(c *gin.Context) {
+func (conn *Connection) loginUser(c *gin.Context) {
 	//Get session and bind POSTED JSON data to posteduser struct
 	session := sessions.Default(c)
-	postedUser := userPOST{}
+	postedUser := models.UserPOST{}
 	err := c.BindJSON(&postedUser)
 	if err != nil {
 		c.AbortWithError(400, err)
 	}
 	//send user info to getuser func to retrieve users based on email and password
-	collection := db.pUser
 	var users []string
-	users = database.GetUser(collection, postedUser.Email, postedUser.Password)
+	users = conn.db.GetUser(postedUser.Email, postedUser.Password)
 	if len(users) > 1 {
 		c.JSON(200, gin.H{"message": "Multiple Users Retrieved",
 			"data": 0})
@@ -65,39 +68,41 @@ func (db *Connection) loginUser(c *gin.Context) {
 		"data": 1})
 }
 
-func (db *Connection) addIngredient(c *gin.Context) {
+func (conn *Connection) addIngredient(c *gin.Context) {
 	//get session and get user id variable
 	session := sessions.Default(c)
 	userHex := session.Get("user")
-	userIng := userIngredient{}
+	userIngredient := struct {
+		Ingredient string `json:"ingredient"`
+	}{}
+	//userIng := userIngredient{}
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)
 	}
 	// set POSTED data to new ingredient
-	err = c.BindJSON(&userIng)
+	err = c.BindJSON(&userIngredient)
 	if err != nil {
 		log.Fatal(err)
 	}
 	//pass new ingredient to database to add it based on the user in the session
-	collection := db.pIngredient
-	database.InsertDataToIngredients(collection, userID, userIng.Ingredient)
+	//collection := conn.db.Ingredient
+	conn.db.InsertDataToIngredients(userID, userIngredient.Ingredient)
 	c.JSON(200, gin.H{
 		"message": "Ingredient added",
 	})
 }
 
-func (db *Connection) removeIngredient(c *gin.Context) {
+func (conn *Connection) removeIngredient(c *gin.Context) {
 	session := sessions.Default(c)
 	userHex := session.Get("user")
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := db.pIngredient
+	//collection := conn.db.Ingredient
 	ingredient := c.Query("ingredient")
-	//userHex := c.Param("userID")
-	ingsRemoved := database.RemoveManyFromIngredients(collection, userID, ingredient)
+	ingsRemoved := conn.db.RemoveManyFromIngredients(userID, ingredient)
 	data := map[int64]string{ingsRemoved: ingredient}
 	if ingsRemoved > 0 {
 		c.JSON(200, gin.H{
@@ -112,7 +117,7 @@ func (db *Connection) removeIngredient(c *gin.Context) {
 	}
 }
 
-func (db *Connection) listIngredients(c *gin.Context) {
+func (conn *Connection) listIngredients(c *gin.Context) {
 	session := sessions.Default(c)
 	userHex := session.Get("user")
 	//userHex, _ := c.Get("user")
@@ -120,7 +125,7 @@ func (db *Connection) listIngredients(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := db.pIngredient
+	collection := conn.db.Ingredient
 	//userHex := c.Param("userID")
 	ingredientCollectionList := database.ListIngredients(collection, userID)
 	resultsMap := make(map[string][]string)
