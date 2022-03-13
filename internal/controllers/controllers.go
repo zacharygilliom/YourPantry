@@ -3,8 +3,8 @@ package controllers
 import (
 	"fmt"
 	"log"
-	"net/http"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	database "github.com/zacharygilliom/internal/database"
@@ -13,69 +13,69 @@ import (
 )
 
 type Connection struct {
-	DB *database.DB
+	Conn *database.Conn
+}
+type login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+type User struct {
+	Id string
 }
 
+var identityKey = "id"
+
 func (conn *Connection) SignUpUser(c *gin.Context) {
-	session := sessions.Default(c)
 	newUser := models.NewUserPOST{}
 	err := c.BindJSON(&newUser)
 	if err != nil {
 		c.AbortWithError(400, err)
 	}
 	var userID interface{}
-	userID = conn.DB.InsertDataToUsers(newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
-	session.Set("user", userID.(primitive.ObjectID).Hex())
-	if err := session.Save(); err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
-		return
-	}
+	userID = conn.Conn.InsertDataToUsers(newUser.Email, newUser.Password, newUser.Firstname, newUser.Lastname)
 	c.JSON(200, gin.H{"message": "user added and authenticated",
-		"data": 1})
+		"data": userID})
 }
 
-func (conn *Connection) LoginUser(c *gin.Context) {
-	//Get session and bind POSTED JSON data to posteduser struct
-	session := sessions.Default(c)
-	postedUser := models.UserPOST{}
-	err := c.BindJSON(&postedUser)
-	if err != nil {
-		c.AbortWithError(400, err)
+func (conn *Connection) LoginUser(c *gin.Context) (interface{}, error) {
+	var loginVals login
+	if err := c.ShouldBind(&loginVals); err != nil {
+		return "", jwt.ErrMissingLoginValues
 	}
-	//send user info to getuser func to retrieve users based on email and password
 	var users []string
-	users = conn.DB.GetUser(postedUser.Email, postedUser.Password)
+	users = conn.Conn.GetUser(loginVals.Email, loginVals.Password)
 	if len(users) > 1 {
 		c.JSON(200, gin.H{"message": "Multiple Users Retrieved",
 			"data": 0})
-		return
+		return "", jwt.ErrMissingLoginValues
 	} else if len(users) == 0 {
 		c.JSON(200, gin.H{"message": "No users retrieved",
 			"data": 0})
-		return
+		return "", jwt.ErrMissingLoginValues
 	}
 	//set userID as the session "user" variable
 	userHex, _ := primitive.ObjectIDFromHex(users[0])
 	userID := userHex.Hex()
-	session.Set("user", userID)
-	c.Set("user", userID)
-	if err := session.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
-		return
-	}
-	c.JSON(200, gin.H{"message": "authenticated user",
-		"data": 1})
+	//fmt.Println(userID)
+	return &User{
+		Id: userID,
+	}, nil
+	return nil, jwt.ErrFailedAuthentication
 }
 
 func (conn *Connection) AddIngredient(c *gin.Context) {
 	//get session and get user id variable
-	session := sessions.Default(c)
-	userHex := session.Get("user")
+	/*
+		session := sessions.Default(c)
+		userHex := session.Get("user")
+	*/
 	userIngredient := struct {
 		Ingredient string `json:"ingredient"`
 	}{}
-	//userIng := userIngredient{}
+	fmt.Println("Add Ingredient Hit")
+	claims := jwt.ExtractClaims(c)
+	userHex := claims[identityKey]
+	fmt.Println("hit")
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)
@@ -86,8 +86,7 @@ func (conn *Connection) AddIngredient(c *gin.Context) {
 		log.Fatal(err)
 	}
 	//pass new ingredient to database to add it based on the user in the session
-	//collection := conn.db.Ingredient
-	conn.DB.InsertDataToIngredients(userID, userIngredient.Ingredient)
+	conn.Conn.InsertDataToIngredients(userID, userIngredient.Ingredient)
 	c.JSON(200, gin.H{
 		"message": "Ingredient added",
 	})
@@ -102,7 +101,7 @@ func (conn *Connection) RemoveIngredient(c *gin.Context) {
 	}
 	//collection := conn.db.Ingredient
 	ingredient := c.Query("ingredient")
-	ingsRemoved := conn.DB.RemoveManyFromIngredients(userID, ingredient)
+	ingsRemoved := conn.Conn.RemoveManyFromIngredients(userID, ingredient)
 	data := map[int64]string{ingsRemoved: ingredient}
 	if ingsRemoved > 0 {
 		c.JSON(200, gin.H{
@@ -118,16 +117,9 @@ func (conn *Connection) RemoveIngredient(c *gin.Context) {
 }
 
 func (conn *Connection) ListIngredients(c *gin.Context) {
-	session := sessions.Default(c)
-	userHex := session.Get("user")
-	//userHex, _ := c.Get("user")
-	userID, err := primitive.ObjectIDFromHex(userHex.(string))
-	if err != nil {
-		log.Fatal(err)
-	}
-	//collection := conn.db.Ingredient
-	//userHex := c.Param("userID")
-	ingredientCollectionList := conn.DB.ListIngredients(userID)
+	claims := jwt.ExtractClaims(c)
+	userID := claims[identityKey]
+	ingredientCollectionList := conn.Conn.ListIngredients(userID)
 	resultsMap := make(map[string][]string)
 	var ingredList []string
 	for _, ing := range ingredientCollectionList {

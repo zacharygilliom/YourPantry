@@ -30,25 +30,29 @@ type Ingredient struct {
 	Name string             `bson:"name, omitempty"`
 }
 
-type DB struct {
+type Conn struct {
 	DB         *mongo.Database
 	User       *mongo.Collection
 	Ingredient *mongo.Collection
 }
 
-func Init(ctx context.Context) (*DB, error) {
+func Init(ctx context.Context) (*Conn, *mongo.Client, error) {
 	user, password, databaseName := configs.GetMongoCreds()
 	databaseURI := "mongodb+srv://" + user + ":" + password + "@production.tobvq.mongodb.net/" + databaseName + "?retryWrites=true&w=majority"
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(databaseURI))
-	defer client.Disconnect(ctx)
-	database := client.Database("pantry")
-	userCollection := database.Collection("user")
-	ingredientCollection := database.Collection("ingredient")
-	newdb := new(DB)
-	newdb.DB = database
-	newdb.User = userCollection
-	newdb.Ingredient = ingredientCollection
-	return newdb, err
+	//defer client.Disconnect(ctx)
+	db := client.Database("pantry")
+	u := db.Collection("user")
+	i := db.Collection("ingredient")
+	d := Conn{db, u, i}
+	/*
+		newdb := new(Conn)
+		newdb.DB = database
+		newdb.User = userCollection
+		newdb.Ingredient = ingredientCollection
+	*/
+	//fmt.Printf("%+v\n", d)
+	return &d, client, err
 }
 
 func PingClient(ctx context.Context, client *mongo.Client) (string, error) {
@@ -62,11 +66,9 @@ func PingClient(ctx context.Context, client *mongo.Client) (string, error) {
 	return message, err
 }
 
-func (db *DB) GetUser(email string, password string) []string {
+func (conn *Conn) GetUser(email string, password string) []string {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	defer ctx.Done()
-	cursor, err := db.User.Find(ctx,
+	cursor, err := conn.User.Find(ctx,
 		bson.M{"email": email})
 	var mongoUser User
 	var emails []string
@@ -83,20 +85,21 @@ func (db *DB) GetUser(email string, password string) []string {
 			emails = append(emails, idString)
 		}
 	}
+	defer cancel()
+	defer ctx.Done()
 	return emails
 }
 
-func (db *DB) InsertDataToUsers(email, password, fname, lname string) interface{} {
+func (conn *Conn) InsertDataToUsers(email, password, fname, lname string) interface{} {
 	hashedPassword, err := hashPassword(password)
 	if err != nil {
 		log.Fatal(err)
 	}
 	password = hashedPassword
-	fmt.Println(email, password, fname, lname)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer ctx.Done()
-	cursor, err := db.User.Find(ctx, bson.M{"email": email})
+	cursor, err := conn.User.Find(ctx, bson.M{"email": email})
 	var mongoUser User
 	var userCheck string
 	if err != nil {
@@ -117,7 +120,7 @@ func (db *DB) InsertDataToUsers(email, password, fname, lname string) interface{
 			{"email", email},
 			{"password", password},
 		}
-		result, err := db.User.InsertOne(ctx, data)
+		result, err := conn.User.InsertOne(ctx, data)
 		fmt.Println("User Added to Collection")
 		if err != nil {
 			log.Fatal(err)
@@ -128,14 +131,14 @@ func (db *DB) InsertDataToUsers(email, password, fname, lname string) interface{
 	}
 }
 
-func (db *DB) InsertDataToIngredients(userHex interface{}, data string) {
+func (conn *Conn) InsertDataToIngredients(userHex interface{}, data string) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	ingredient := bson.D{
 		{"user", userHex},
 		{"name", data},
 	}
-	result, err := db.Ingredient.InsertOne(ctx, ingredient)
+	result, err := conn.Ingredient.InsertOne(ctx, ingredient)
 	fmt.Printf("%v added to collection\n", data)
 	if err != nil {
 		log.Fatal(err)
@@ -143,14 +146,14 @@ func (db *DB) InsertDataToIngredients(userHex interface{}, data string) {
 	fmt.Println(result.InsertedID)
 }
 
-func (db *DB) RemoveManyFromIngredients(userHex interface{}, data string) int64 {
+func (conn *Conn) RemoveManyFromIngredients(userHex interface{}, data string) int64 {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
 	filter := bson.D{
 		{"user", userHex},
 		{"name", data},
 	}
-	result, err := db.Ingredient.DeleteMany(ctx, filter)
+	result, err := conn.Ingredient.DeleteMany(ctx, filter)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -164,10 +167,10 @@ func (db *DB) RemoveManyFromIngredients(userHex interface{}, data string) int64 
 	return result.DeletedCount
 }
 
-func (db *DB) ListIngredients(userHex interface{}) []Ingredient {
+func (conn *Conn) ListIngredients(userHex interface{}) []Ingredient {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	defer ctx.Done()
-	cursor, err := db.Ingredient.Find(ctx, bson.M{"user": userHex})
+	cursor, err := conn.Ingredient.Find(ctx, bson.M{"user": userHex})
 	var results []Ingredient
 	if err != nil {
 		log.Fatal(err)

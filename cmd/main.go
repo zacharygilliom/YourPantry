@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -42,38 +43,51 @@ func main() {
 	defer cancel()
 
 	//Initialize our database and collections
-	db, err := database.Init(ctx)
+	var dat *database.Conn = new(database.Conn)
+	dat, client, err := database.Init(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	defer client.Disconnect(ctx)
+	var conn *controllers.Connection = new(controllers.Connection)
+	conn.Conn = dat
+	/*
+		if err != nil {
+			log.Fatal(err)
+		}
+	*/
 	//Create instance of our database connection and run our engine
-	var conn *controllers.Connection
-	conn.DB = db
-	r := engine(conn.DB)
+	r := engine(conn)
 	r.Run()
 }
 
-func engine(db *database.DB) *gin.Engine {
+func engine(conn *controllers.Connection) *gin.Engine {
 	r := gin.Default()
 	//set new cookie store and new session
-	r.Use(cors.Default())
+	//r.Use(cors.Default())
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:8000"}
+	config.AllowHeaders = []string{"Content-Type, Origin, Authorization, Access-Control-Allow-Headers"}
+	config.AllowCredentials = true
+	r.Use(cors.New(config))
 	r.Use(gin.Logger())
 
-	authMiddleware, err := jwt.Init()
+	authMiddleware, err := jwt.Init(conn)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	//endpoints to login or create account
-	r.POST("/login", authMiddleware.LoginHandler)
-	r.POST("/sign-up", db.SignUpUser)
+	r.POST("/sign-up", conn.SignUpUser)
 
+	//endpoints to login account and authenticate the user
+	r.POST("/login", authMiddleware.LoginHandler)
 	private := r.Group("/user")
+	private.Use(authMiddleware.MiddlewareFunc())
+	fmt.Println(authMiddleware.Authenticator)
 	{
-		private.POST("/ingredients/add", db.AddIngredient)
-		private.POST("/ingredients/remove", db.RemoveIngredient)
-		private.GET("/ingredients/list", db.ListIngredients)
+		private.POST("/ingredients/add", conn.AddIngredient)
+		private.POST("/ingredients/remove", conn.RemoveIngredient)
+		private.GET("/ingredients/list", conn.ListIngredients)
 	}
 	return r
 }

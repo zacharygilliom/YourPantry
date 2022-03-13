@@ -1,12 +1,12 @@
 package jwt
 
 import (
+	"fmt"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/zacharygilliom/internal/database"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/zacharygilliom/internal/controllers"
 )
 
 var identityKey = "id"
@@ -20,7 +20,7 @@ type login struct {
 	Password string `json:"password"`
 }
 
-func Init() (*jwt.GinJWTMiddleware, error) {
+func Init(conn *controllers.Connection) (*jwt.GinJWTMiddleware, error) {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte("secret"),
@@ -37,34 +37,28 @@ func Init() (*jwt.GinJWTMiddleware, error) {
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
+
+			fmt.Println(claims[identityKey])
 			return &User{
 				Id: claims[identityKey].(string),
 			}
 		},
-		Authenticator: func(c *gin.Context) (interface{}, error) {
-			var loginVals login
-			if err := c.ShouldBind(&loginVals); err != nil {
-				return "", jwt.ErrMissingLoginValues
+		Authenticator: conn.LoginUser,
+		Authorizator: func(data interface{}, c *gin.Context) bool {
+			if v, ok := data.(*User); ok && v.Id != "" {
+				return true
 			}
-			var users []string
-			user = database.GetUser(collection, login.Email, login.Password)
-			if len(users) > 1 {
-				c.JSON(200, gin.H{"message": "Multiple Users Retrieved",
-					"data": 0})
-				return
-			} else if len(users) == 0 {
-				c.JSON(200, gin.H{"message": "No users retrieved",
-					"data": 0})
-				return
-			}
-			//set userID as the session "user" variable
-			userHex, _ := primitive.ObjectIDFromHex(users[0])
-			userID := userHex.Hex()
-			return &User{
-				Id: userID,
-			}, nil
-			return nil, jwt.ErrFailedAuthentication
+			return false
 		},
+		Unauthorized: func(c *gin.Context, code int, message string) {
+			c.JSON(code, gin.H{
+				"code":    code,
+				"message": message,
+			})
+		},
+		TokenLookup:   "header: Authorization, query: token, cookie: token",
+		TokenHeadName: "Bearer",
+		TimeFunc:      time.Now,
 	})
 	return authMiddleware, err
 }

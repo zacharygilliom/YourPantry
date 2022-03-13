@@ -51,7 +51,8 @@ async function signUpUser(event) {
 		let data = await response.json();
 		//console.log(data);
 		if (data["data"] == 1) {
-			window.location.replace("home.html");
+			window.location.replace("landing.html");
+			alert("New User Account has been created.  Please sign in Below!")
 			return false
 		}
 	} catch (error) {
@@ -67,19 +68,23 @@ async function loginUser(event) {
 		let userData = {email:username, password:pass};
 		const requestOption = {
 			method: 'POST',
-			headers: {'Content-Type': 'application/json'},
+			headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Credentials':true,'Access-Control-Allow-Origin': '*', "Access-Control-Allow-Headers": 'access-control-allow-origin, access-control-allow-headers'},
 			body: JSON.stringify(userData)
 		};
 		let response = await fetch('http://localhost:8080/login', requestOption);
 		let data = await response.json();
-		//console.log(data);
-		if (data["data"] == 0) {
+		console.log(response);
+		console.log(data);
+		if (data["code"] != 200) {
 			alert("Login Not Successful: Please Try Again");
 			//location.reload();
-		} else if (data["data"] == 1) {
+		} else if (data["code"] == 200) {
+			document.cookie = "token=" + data['token'] + "; path=/; SameSite=None; secure=true;"
+			//window.localStorage.setItem('token', data['token']);
 			window.location.replace("home.html");
 			return false;
 		}
+	//TODO: Catch the Error
 	} catch (error) {
 		console.log(error);
 	}
@@ -90,16 +95,40 @@ async function quickAddIngredient(event) {
 		event.preventDefault();
 		ingredient = document.getElementById('Ingredient-selection').value;
 		let userData = {ingredient:ingredient};
+		var token = getCookie("token");
 		const requestOption = {
 			method:'POST',
-			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify(userData)
+			headers: {'Content-Type': 'application/json', 'Authorization':'Bearer ' + token},
+			body: JSON.stringify(userData),
+			SendCookie: true,
+			SecureCookie: false,
+			CookieDomain: "localhost:8080",
+			CookieName: "token",
+			TokenLookup: "cookie:token",
+			credentials:'include'
 		};
-		console.log(userData);
+		//console.log(userData);
 		let response = await fetch('http://localhost:8080/user/ingredients/add', requestOption);
 		let data = await response.json();
+		console.log(response);
 		console.log(data);
 	} catch (error) {
 		console.log(error);
 	}
+}
+
+function getCookie(cname) {
+	let name = cname + "=";
+	let decodedCookie = decodeURIComponent(document.cookie);
+	let ca = decodedCookie.split(';');
+	for (let i = 0; i < ca.length; i++) {
+		let c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
 }
