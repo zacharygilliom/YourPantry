@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -18,7 +17,7 @@ const (
 )
 
 type User struct {
-	Id string
+	Username string
 }
 
 type userPOST struct {
@@ -83,7 +82,6 @@ func engine(conn *controllers.Connection) *gin.Engine {
 	r.POST("/login", authMiddleware.LoginHandler)
 	private := r.Group("/user")
 	private.Use(authMiddleware.MiddlewareFunc())
-	fmt.Println(authMiddleware.Authenticator)
 	{
 		private.POST("/ingredients/add", conn.AddIngredient)
 		private.POST("/ingredients/remove", conn.RemoveIngredient)

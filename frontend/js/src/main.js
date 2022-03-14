@@ -68,7 +68,7 @@ async function loginUser(event) {
 		let userData = {email:username, password:pass};
 		const requestOption = {
 			method: 'POST',
-			headers: {'Content-Type': 'application/json', 'Access-Control-Allow-Credentials':true,'Access-Control-Allow-Origin': '*', "Access-Control-Allow-Headers": 'access-control-allow-origin, access-control-allow-headers'},
+			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify(userData)
 		};
 		let response = await fetch('http://localhost:8080/login', requestOption);
@@ -96,6 +96,7 @@ async function quickAddIngredient(event) {
 		ingredient = document.getElementById('Ingredient-selection').value;
 		let userData = {ingredient:ingredient};
 		var token = getCookie("token");
+		console.log(token);
 		const requestOption = {
 			method:'POST',
 			headers: {'Content-Type': 'application/json', 'Authorization':'Bearer ' + token},

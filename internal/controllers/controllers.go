@@ -20,7 +20,7 @@ type login struct {
 	Password string `json:"password"`
 }
 type User struct {
-	Id string
+	Username string
 }
 
 var identityKey = "id"
@@ -56,11 +56,13 @@ func (conn *Connection) LoginUser(c *gin.Context) (interface{}, error) {
 	//set userID as the session "user" variable
 	userHex, _ := primitive.ObjectIDFromHex(users[0])
 	userID := userHex.Hex()
-	//fmt.Println(userID)
-	return &User{
-		Id: userID,
-	}, nil
-	return nil, jwt.ErrFailedAuthentication
+	authUser := User{}
+	authUser.Username = userID
+	fmt.Printf("%+v", authUser)
+	if userID == "" {
+		return nil, jwt.ErrFailedAuthentication
+	}
+	return authUser, nil
 }
 
 func (conn *Connection) AddIngredient(c *gin.Context) {
