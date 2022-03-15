@@ -45,13 +45,6 @@ func Init(ctx context.Context) (*Conn, *mongo.Client, error) {
 	u := db.Collection("user")
 	i := db.Collection("ingredient")
 	d := Conn{db, u, i}
-	/*
-		newdb := new(Conn)
-		newdb.DB = database
-		newdb.User = userCollection
-		newdb.Ingredient = ingredientCollection
-	*/
-	//fmt.Printf("%+v\n", d)
 	return &d, client, err
 }
 

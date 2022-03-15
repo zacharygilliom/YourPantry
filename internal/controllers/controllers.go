@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	database "github.com/zacharygilliom/internal/database"
 	"github.com/zacharygilliom/internal/models"
@@ -58,7 +56,6 @@ func (conn *Connection) LoginUser(c *gin.Context) (interface{}, error) {
 	userID := userHex.Hex()
 	authUser := User{}
 	authUser.Username = userID
-	fmt.Printf("%+v", authUser)
 	if userID == "" {
 		return nil, jwt.ErrFailedAuthentication
 	}
@@ -67,17 +64,11 @@ func (conn *Connection) LoginUser(c *gin.Context) (interface{}, error) {
 
 func (conn *Connection) AddIngredient(c *gin.Context) {
 	//get session and get user id variable
-	/*
-		session := sessions.Default(c)
-		userHex := session.Get("user")
-	*/
 	userIngredient := struct {
 		Ingredient string `json:"ingredient"`
 	}{}
-	fmt.Println("Add Ingredient Hit")
 	claims := jwt.ExtractClaims(c)
 	userHex := claims[identityKey]
-	fmt.Println("hit")
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)
@@ -95,25 +86,29 @@ func (conn *Connection) AddIngredient(c *gin.Context) {
 }
 
 func (conn *Connection) RemoveIngredient(c *gin.Context) {
-	session := sessions.Default(c)
-	userHex := session.Get("user")
+	userIngredient := struct {
+		Ingredient string `json:"ingredient"`
+	}{}
+	claims := jwt.ExtractClaims(c)
+	userHex := claims[identityKey]
 	userID, err := primitive.ObjectIDFromHex(userHex.(string))
 	if err != nil {
 		log.Fatal(err)
 	}
-	//collection := conn.db.Ingredient
-	ingredient := c.Query("ingredient")
-	ingsRemoved := conn.Conn.RemoveManyFromIngredients(userID, ingredient)
-	data := map[int64]string{ingsRemoved: ingredient}
+	err = c.BindJSON(&userIngredient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ingsRemoved := conn.Conn.RemoveManyFromIngredients(userID, userIngredient.Ingredient)
 	if ingsRemoved > 0 {
 		c.JSON(200, gin.H{
 			"message": "Ingredient removed",
-			"data":    data,
+			"data":    ingsRemoved,
 		})
 	} else {
 		c.JSON(200, gin.H{
 			"message": "Ingredient is not in your pantry. Did you misspell it?",
-			"data":    data,
+			"data":    ingsRemoved,
 		})
 	}
 }

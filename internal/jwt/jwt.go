@@ -37,19 +37,10 @@ func Init(conn *controllers.Connection) (*jwt.GinJWTMiddleware, error) {
 					identityKey: finalV,
 				}
 			}
-			/*
-				if v, ok := data.(*User); ok {
-					return jwt.MapClaims{
-						identityKey: v.Username,
-					}
-				}
-			*/
 			return jwt.MapClaims{}
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-
-			fmt.Println(claims[identityKey])
 			return &User{
 				Username: claims[identityKey].(string),
 			}
@@ -59,7 +50,6 @@ func Init(conn *controllers.Connection) (*jwt.GinJWTMiddleware, error) {
 			if v, ok := data.(*User); ok && v.Username != "" {
 				return true
 			}
-			fmt.Println(data)
 			return false
 		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
