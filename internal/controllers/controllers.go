@@ -81,6 +81,7 @@ func (conn *Connection) AddIngredient(c *gin.Context) {
 	//pass new ingredient to database to add it based on the user in the session
 	conn.Conn.InsertDataToIngredients(userID, userIngredient.Ingredient)
 	c.JSON(200, gin.H{
+		"code":    200,
 		"message": "Ingredient added",
 	})
 }
@@ -104,6 +105,7 @@ func (conn *Connection) RemoveIngredient(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Ingredient removed",
 			"data":    ingsRemoved,
+			"code":    200,
 		})
 	} else {
 		c.JSON(200, gin.H{
@@ -115,14 +117,18 @@ func (conn *Connection) RemoveIngredient(c *gin.Context) {
 
 func (conn *Connection) ListIngredients(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
-	userID := claims[identityKey]
+	userHex := claims[identityKey]
+	userID, err := primitive.ObjectIDFromHex(userHex.(string))
+	if err != nil {
+		log.Fatal(err)
+	}
 	ingredientCollectionList := conn.Conn.ListIngredients(userID)
-	resultsMap := make(map[string][]string)
+	//resultsMap := make(map[string][]string)
 	var ingredList []string
 	for _, ing := range ingredientCollectionList {
 		ingredList = append(ingredList, ing.Name)
 	}
-	resultsMap["ingredients"] = ingredList
+	//resultsMap["ingredients"] = ingredList
 	/*
 		if len(resultsMap) == 0 {
 			res, err := database.PingClient(ctx, client)
@@ -133,5 +139,8 @@ func (conn *Connection) ListIngredients(c *gin.Context) {
 			}
 		}
 	*/
-	c.JSON(200, resultsMap)
+	c.JSON(200, gin.H{
+		"ingredients": ingredList,
+		"size":        len(ingredList),
+	})
 }

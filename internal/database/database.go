@@ -171,6 +171,7 @@ func (conn *Conn) ListIngredients(userHex interface{}) []Ingredient {
 		for cursor.Next(ctx) {
 			var result Ingredient
 			err := cursor.Decode(&result)
+			fmt.Println(result)
 			if err != nil {
 				log.Fatal(err)
 			} else {
