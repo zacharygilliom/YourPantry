@@ -17,6 +17,41 @@ function landing() {
 	});
 }
 
+function home() {
+	getUserData();
+}
+
+function logout() {
+	logoutUser();
+}
+
+
+async function getUserData() {
+	try {
+		var token = getCookie("token");
+		const requestOption = {
+			method: 'GET',
+			headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+			SendCookie: true,
+			SecureCookie:false,
+			CookieDomain: 'localhost:8080',
+			CookieName: 'token',
+			TokenLookup: 'cookie:token',
+			credentials: 'include'
+		};
+		let response = await fetch('http://localhost:8080/user/data', requestOption);
+		console.log(response);
+		let data = await response.json();
+		console.log(data);
+		userDataDiv = document.getElementById('user-data');
+		h1 = document.createElement('h1');
+		h1.innerHTML = 'Welcome to YourPantry ' + data['firstname'];
+		userDataDiv.appendChild(h1);
+	} catch (error) {
+		console.log(error)
+	}
+}
+
 async function fetchIngredList() {
 	try {
 		var token = getCookie("token");
@@ -104,6 +139,33 @@ async function signUpUser(event) {
 			window.location.replace("landing.html");
 			alert("New User Account has been created.  Please sign in Below!")
 			return false
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function logoutUser() {
+	try {
+		event.preventDefault();
+		var token = getCookie("token");
+		const requestOption = {
+			method:'POST',
+			headers: {'Content-Type': 'application/json', 'Authorization':'Bearer ' + token},
+			SendCookie: true,
+			SecureCookie: false,
+			CookieDomain: "localhost:8080",
+			CookieName: "token",
+			TokenLookup: "cookie:token",
+			credentials:'include'
+		};
+		let response = await fetch('http://localhost:8080/logout', requestOption);
+		let data = await response.json();
+		console.log(response);
+		if (data['code'] == 200) {
+			//TODO: Fix the clear cookies function.
+			deleteAllCookies();
+			window.location.replace("landing.html");
 		}
 	} catch (error) {
 		console.log(error);
@@ -211,3 +273,14 @@ function getCookie(cname) {
 	}
 	return "";
 }
+
+function deleteAllCookies() {
+	var cookies = document.cookie.split(";");
+	for (var i = 0; i < cookies.length; i++) {
+		var cookie = cookies[i];
+		var eqPos = cookie.indexOf("=");
+		var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+		document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+	}
+}
+

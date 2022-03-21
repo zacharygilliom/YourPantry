@@ -85,6 +85,22 @@ func (conn *Connection) AddIngredient(c *gin.Context) {
 		"message": "Ingredient added",
 	})
 }
+func (conn *Connection) GetUserData(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+	userHex := claims[identityKey]
+	userID, err := primitive.ObjectIDFromHex(userHex.(string))
+	if err != nil {
+		log.Fatal(err)
+	}
+	var user models.User
+	user = conn.Conn.GetUserData(userID)
+	c.JSON(200, gin.H{
+		"code":      200,
+		"firstname": user.Firstname,
+		"lastname":  user.Lastname,
+		"email":     user.Email,
+	})
+}
 
 func (conn *Connection) RemoveIngredient(c *gin.Context) {
 	userIngredient := struct {

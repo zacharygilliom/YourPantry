@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/zacharygilliom/configs"
+	"github.com/zacharygilliom/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -64,7 +65,7 @@ func (conn *Conn) GetUser(email string, password string) []string {
 	cursor, err := conn.User.Find(ctx,
 		bson.M{"email": email})
 	var mongoUser User
-	var emails []string
+	var ids []string
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,12 +76,37 @@ func (conn *Conn) GetUser(email string, password string) []string {
 		}
 		idString := mongoUser.ID.Hex()
 		if checkPasswordHash(password, mongoUser.Password) {
-			emails = append(emails, idString)
+			ids = append(ids, idString)
 		}
 	}
 	defer cancel()
 	defer ctx.Done()
-	return emails
+	return ids
+}
+
+func (conn *Conn) GetUserData(userID interface{}) models.User {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	defer ctx.Done()
+	cursor, err := conn.User.Find(ctx,
+		bson.M{"_id": userID})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var mongoUser models.User
+	var users []models.User
+	for cursor.Next(ctx) {
+		err := cursor.Decode(&mongoUser)
+		if err != nil {
+			log.Fatal(err)
+		}
+		users = append(users, mongoUser)
+	}
+	if len(users) == 0 {
+		log.Fatal("No Users Found with ID:%v\n", userID)
+	} else if len(users) == 1 {
+		return users[0]
+	}
+	return mongoUser
 }
 
 func (conn *Conn) InsertDataToUsers(email, password, fname, lname string) interface{} {

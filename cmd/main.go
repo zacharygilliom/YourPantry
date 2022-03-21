@@ -80,12 +80,14 @@ func engine(conn *controllers.Connection) *gin.Engine {
 
 	//endpoints to login account and authenticate the user
 	r.POST("/login", authMiddleware.LoginHandler)
+	r.POST("/logout", authMiddleware.LogoutHandler)
 	private := r.Group("/user")
 	private.Use(authMiddleware.MiddlewareFunc())
 	{
 		private.POST("/ingredients/add", conn.AddIngredient)
 		private.POST("/ingredients/remove", conn.RemoveIngredient)
 		private.GET("/ingredients/list", conn.ListIngredients)
+		private.GET("/data", conn.GetUserData)
 	}
 	return r
 }
