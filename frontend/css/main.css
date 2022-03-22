@@ -26,16 +26,26 @@
 	text-align:center;
 }
 
+#ingredient-changer-header {
+	border:1px solid var(--border-color);
+	border-radius:5px;
+	text-align:center;
+}
+
 #ingredient-quick-add {
 	width:65%;
 	margin:auto;
 }
 
-#ingredient-list {
+#ingredient-list-header {
 	flex-grow:1;
 	border:1px solid var(--border-color);
 	border-radius:5px;
 	text-align: center;
+}
+#ingredient-lister {
+	flex: 1;
+	text-align:center;
 }
 
 #ingredient-greeter{
