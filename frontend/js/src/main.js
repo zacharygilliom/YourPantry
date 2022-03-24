@@ -3,8 +3,14 @@ function ingredients() {
 	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	fetchIngredList();
 	let quickAddForm = document.getElementById('quick-add-form');
+	let longAddform = document.getElementById('long-add-form');
 	quickAddForm.addEventListener('submit', function(event) {
-		quickAddIngredient(event);
+		let formName = 'quick-add';
+		quickAddIngredient(event, formName);
+	});
+	longAddform.addEventListener('submit', function(event) {
+		let formName = 'long-add';
+		quickAddIngredient(event, formName);
 	});
 	
 }
@@ -207,10 +213,19 @@ async function loginUser(event) {
 	}
 }
 
-async function quickAddIngredient(event) {
+async function quickAddIngredient(event, form) {
 	try {
+		console.log(form);
 		event.preventDefault();
-		ingredient = document.getElementById('Ingredient-selection').value;
+		if (form == 'quick-add') {
+			ingredient = document.getElementById('ingredient-quick-add-selection').value;
+		} else if (form == 'long-add') {
+			ingredient = document.getElementById('long-add-ingredient-selection').value;
+			console.log(ingredient);
+		} else {
+			ingredient = "";
+		}
+		//ingredient = document.getElementById('ingredient-' + form + '-selection').value;
 		let userData = {ingredient:ingredient};
 		var token = getCookie("token");
 		const requestOption = {

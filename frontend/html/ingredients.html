@@ -37,9 +37,9 @@
 							<div id='ingredient-quick-add'>
 								<form id='quick-add-form'>
 								  <div class="form-group row">
-								    <label for="Ingredient-selection" class="col-sm-4 col-form-label">Ingredient Quick Add</label>
+								    <label for="ingredient-quick-add-selection" class="col-sm-4 col-form-label">Ingredient Quick Add</label>
 								    <div class="col-sm-5">
-								    <select class="form-control form-select" id="Ingredient-selection">
+								    <select class="form-control form-select" id="ingredient-quick-add-selection">
 									    <option>Flour</option>
 									    <option>Eggs</option>
 									    <option>Bread</option>
@@ -54,7 +54,19 @@
 							</div>
 						</div>
 						<div id='ingredient-changer-long-add'>
-							<a>Long add section</a>
+							<div id=ingredient-long-add'>
+								<form id='long-add-form'>
+									<div class='form-group row'>
+										<label for="ingredient-long-add-selection" class="col-sm-4 col-form-label">Ingredient Long Add</label>
+										<div class="col-sm-5">
+											<input id='long-add-ingredient-selection' class="form-control" type="text" placeholder="Enter an Ingredient...">
+										</div>
+										<div class="col-sm-2">
+											<button type="submit" class="btn btn-primary">Submit</button>
+										</div>
+									</div>
+								</form>
+							</div>
 						</div>
 					</div>
 					<div id='ingredient-lister'>
@@ -63,7 +75,6 @@
 								<a>Here we will list the user's current ingredient list</a>
 						</div>
 						<div id='ingredient-list'>
-
 						</div>
 					</div>
 				</div>
