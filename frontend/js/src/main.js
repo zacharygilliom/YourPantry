@@ -1,4 +1,6 @@
 function ingredients() {
+	css_file = document.querySelector('head');
+	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	fetchIngredList();
 	let quickAddForm = document.getElementById('quick-add-form');
 	quickAddForm.addEventListener('submit', function(event) {
@@ -7,6 +9,8 @@ function ingredients() {
 	
 }
 function landing() {
+	css_file = document.querySelector('head');
+	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	let signUpForm = document.getElementById('sign-up-form');
 	let loginForm = document.getElementById('login-form');
 	loginForm.addEventListener('submit', function(event) {
@@ -18,10 +22,14 @@ function landing() {
 }
 
 function home() {
+	css_file = document.querySelector('head');
+	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	getUserData();
 }
 
 function logout() {
+	css_file = document.querySelector('head');
+	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	logoutUser();
 }
 
