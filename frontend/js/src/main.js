@@ -6,11 +6,11 @@ function ingredients() {
 	let longAddform = document.getElementById('long-add-form');
 	quickAddForm.addEventListener('submit', function(event) {
 		let formName = 'quick-add';
-		quickAddIngredient(event, formName);
+		addIngredient(event, formName);
 	});
 	longAddform.addEventListener('submit', function(event) {
 		let formName = 'long-add';
-		quickAddIngredient(event, formName);
+		addIngredient(event, formName);
 	});
 	
 }
@@ -129,7 +129,6 @@ function createIngredientList(ul, item, idx) {
 	bt.appendChild(iconSVG);
 	iconSVG.appendChild(path1SVG);
 	iconSVG.appendChild(path2SVG);
-	//return li
 }
 
 async function signUpUser(event) {
@@ -213,9 +212,8 @@ async function loginUser(event) {
 	}
 }
 
-async function quickAddIngredient(event, form) {
+async function addIngredient(event, form) {
 	try {
-		console.log(form);
 		event.preventDefault();
 		if (form == 'quick-add') {
 			ingredient = document.getElementById('ingredient-quick-add-selection').value;
@@ -225,7 +223,6 @@ async function quickAddIngredient(event, form) {
 		} else {
 			ingredient = "";
 		}
-		//ingredient = document.getElementById('ingredient-' + form + '-selection').value;
 		let userData = {ingredient:ingredient};
 		var token = getCookie("token");
 		const requestOption = {
@@ -242,10 +239,8 @@ async function quickAddIngredient(event, form) {
 		let response = await fetch('http://localhost:8080/user/ingredients/add', requestOption);
 		let data = await response.json();
 		if (data['code'] != 200) {
-			//alert("Ingredient not added! Please Try Again");
 			location.reload();
 		} else if (data['code'] == 200) {
-			//alert("Ingredient has been added!");
 			location.reload();
 		}
 	} catch (error) {

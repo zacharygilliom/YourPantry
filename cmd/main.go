@@ -50,11 +50,6 @@ func main() {
 	defer client.Disconnect(ctx)
 	var conn *controllers.Connection = new(controllers.Connection)
 	conn.Conn = dat
-	/*
-		if err != nil {
-			log.Fatal(err)
-		}
-	*/
 	//Create instance of our database connection and run our engine
 	r := engine(conn)
 	r.Run()
@@ -63,7 +58,6 @@ func main() {
 func engine(conn *controllers.Connection) *gin.Engine {
 	r := gin.Default()
 	//set new cookie store and new session
-	//r.Use(cors.Default())
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:8000"}
 	config.AllowHeaders = []string{"Content-Type, Origin, Authorization, Access-Control-Allow-Headers"}
