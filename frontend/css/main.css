@@ -1,5 +1,10 @@
 :root {
-	--border-color: #DCDCDC;
+	--border-color: #618985;
+	--ingredients-border-color: #F2F3D9;
+	--ingredients-border-radius: 7px;
+	--ingredients-background-color: #141E3E;
+	--ingredients-text-color: #F2F3D9;
+	--ingredients-border-width: .5px;
 }
 
 .sign-up-login{
@@ -9,49 +14,88 @@
 	border: 1px solid #ADD8E6;
 	border-radius:5px;
 }
+
+.navbar-custom {
+	background-color: var(--ingredients-background-color);
+}
+.navbar-brand {
+	color: var(--ingredients-text-color);
+}
+.nav-link {
+	color: var(--ingredients-text-color);
+}
+#ingredients-body {
+	background-color: var(--ingredients-background-color);
+	color: var(--ingredients-text-color)
+
+}
 #ingredient-container {
 	margin: auto;
 	width: 99%;
+	margin-top: .25em;
 }
 
-#flex-container {
-	display:flex;
-	justify-content:space-between;
+.grid-container {
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 2px;
 }
 
 #ingredient-changer {
-	width: 50%;
-	border:1px solid var(--border-color);
-	border-radius:5px;
 	text-align:center;
+	margin-right: .25em;
+}
+
+#ingredient-changer-quick-add {
+	border: var(--ingredients-border-width) solid var(--ingredients-border-color);
+	border-radius: var(--ingredients-border-radius);
+	padding: .5em;
+	margin-top: .25em;
+	margin-bottom: .25em;
+}
+
+#ingredient-changer-long-add {
+	border: var(--ingredients-border-width) solid var(--ingredients-border-color);
+	border-radius: var(--ingredients-border-radius);
+	padding: .5em;
+	margin-top: .25em;
+	margin-bottom: .25em;
 }
 
 #ingredient-changer-header {
-	border:1px solid var(--border-color);
-	border-radius:5px;
+	border: var(--ingredients-border-width) solid var(--ingredients-border-color);
+	border-radius:var(--ingredients-border-radius);
 	text-align:center;
 }
 
 #ingredient-quick-add {
-	width:65%;
 	margin:auto;
 }
 
 #ingredient-list-header {
 	flex-grow:1;
-	border:1px solid var(--border-color);
-	border-radius:5px;
+	border:var(--ingredients-border-width) solid var(--ingredients-border-color);
+	border-radius:var(--ingredients-border-radius);
 	text-align: center;
+	margin-bottom: .25em;
 }
 #ingredient-lister {
-	flex: 1;
+	margin-left: .25em;
 	text-align:center;
+}
+.list-group-item {
+	background-color: var(--ingredients-background-color);
+	color: var(--ingredients-text-color);
+	margin-top: 1px;
+	border: var(--ingredients-border-width) solid var(--ingredients-border-color);
 }
 
 #ingredient-greeter{
 	margin: auto;
 	text-align: center;
 	width: 99%;
-	border:1px solid var(--border-color);
-	border-radius:5px;
+	border:var(--ingredients-border-width) solid var(--ingredients-border-color);
+	border-radius:var(--ingredients-border-radius);
+	margin-top: .25em;
+	margin-bottom: .25em;
 }
