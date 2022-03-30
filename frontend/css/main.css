@@ -7,6 +7,10 @@
 	--ingredients-border-width: .5px;
 }
 
+html * {
+	font-family: Optima, sans-serif;
+}
+
 .sign-up-login{
 	margin: auto;
 	width: 20%;	
@@ -20,9 +24,11 @@
 }
 .navbar-brand {
 	color: var(--ingredients-text-color);
+	font-size: 36px;
 }
 .nav-link {
 	color: var(--ingredients-text-color);
+	font-size: 24px;
 }
 #ingredients-body {
 	background-color: var(--ingredients-background-color);
@@ -98,4 +104,14 @@
 	border-radius:var(--ingredients-border-radius);
 	margin-top: .25em;
 	margin-bottom: .25em;
+}
+
+#home-body {
+	background-color: var(--ingredients-background-color);
+	color: var(--ingredients-text-color);
+}
+
+#user-welcome {
+	border:var(--ingredients-border-width) solid var(--ingredients-border-color);
+	border-radius:var(--ingredients-border-radius);
 }
