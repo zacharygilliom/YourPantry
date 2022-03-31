@@ -1,10 +1,10 @@
 :root {
-	--border-color: #618985;
-	--ingredients-border-color: #F2F3D9;
+	--ingredients-border-color: #F4F1DE;
 	--ingredients-border-radius: 7px;
-	--ingredients-background-color: #141E3E;
-	--ingredients-text-color: #F2F3D9;
+	--ingredients-background-color: #313349;
+	--ingredients-text-color: #F4F1DE;
 	--ingredients-border-width: .5px;
+	--button-color: #81B29A;
 }
 
 html * {
@@ -114,4 +114,10 @@ html * {
 #user-welcome {
 	border:var(--ingredients-border-width) solid var(--ingredients-border-color);
 	border-radius:var(--ingredients-border-radius);
+}
+
+.btn-custom {
+	color: var(--ingredients-text-color);
+	background-color: var(--button-color);
+	border-color: var(--button-color);
 }
