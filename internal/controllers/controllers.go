@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	database "github.com/zacharygilliom/internal/database"
 	"github.com/zacharygilliom/internal/models"
+	"github.com/zacharygilliom/internal/recipe"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -139,24 +141,31 @@ func (conn *Connection) ListIngredients(c *gin.Context) {
 		log.Fatal(err)
 	}
 	ingredientCollectionList := conn.Conn.ListIngredients(userID)
-	//resultsMap := make(map[string][]string)
 	var ingredList []string
 	for _, ing := range ingredientCollectionList {
 		ingredList = append(ingredList, ing.Name)
 	}
-	//resultsMap["ingredients"] = ingredList
-	/*
-		if len(resultsMap) == 0 {
-			res, err := database.PingClient(ctx, client)
-			if err != nil {
-				c.JSON(200, gin.H{
-					"message": res,
-				})
-			}
-		}
-	*/
 	c.JSON(200, gin.H{
 		"ingredients": ingredList,
 		"size":        len(ingredList),
 	})
+}
+
+func (conn *Connection) SearchRecipes(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+	userHex := claims[identityKey]
+	userID, err := primitive.ObjectIDFromHex(userHex.(string))
+	if err != nil {
+		log.Fatal(err)
+	}
+	recipes := recipe.GetRecipes()
+	ingredientCollectionList := conn.Conn.ListIngredients(userID)
+	var ingredList []string
+	for _, ing := range ingredientCollectionList {
+		fmt.Println(ing.Name)
+		ingredList = append(ingredList, ing.Name)
+	}
+	for _, recipe := range recipes.Recipes {
+		fmt.Println(recipe.Title)
+	}
 }

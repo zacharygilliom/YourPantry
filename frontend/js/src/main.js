@@ -34,6 +34,9 @@ function home() {
 }
 
 function recipe() {
+	css_file = document.querySelector('head');
+	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
+	getRecipes();
 	alert("Recipe Homepage");
 }
 
@@ -41,6 +44,28 @@ function logout() {
 	css_file = document.querySelector('head');
 	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	logoutUser();
+}
+
+async function getRecipes() {
+	try {
+		var token = getCookie("token");
+		const requestOption = {
+			method: 'GET',
+			headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+			SendCookie: true,
+			SecureCookie:false,
+			CookieDomain: 'localhost:8080',
+			CookieName: 'token',
+			TokenLookup: 'cookie:token',
+			credentials: 'include'
+		};
+		let response = await fetch('http://localhost:8080/user/recipes/search', requestOption);
+		console.log(response);
+		let data = await response.json();
+		console.log(data);
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 

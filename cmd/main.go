@@ -81,6 +81,7 @@ func engine(conn *controllers.Connection) *gin.Engine {
 		private.POST("/ingredients/add", conn.AddIngredient)
 		private.POST("/ingredients/remove", conn.RemoveIngredient)
 		private.GET("/ingredients/list", conn.ListIngredients)
+		private.GET("/recipes/search", conn.SearchRecipes)
 		private.GET("/data", conn.GetUserData)
 	}
 	return r
