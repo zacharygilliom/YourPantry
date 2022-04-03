@@ -33,6 +33,10 @@ function home() {
 	getUserData();
 }
 
+function recipe() {
+	alert("Recipe Homepage");
+}
+
 function logout() {
 	css_file = document.querySelector('head');
 	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
