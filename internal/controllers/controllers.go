@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -83,7 +82,6 @@ func (conn *Connection) AddIngredient(c *gin.Context) {
 	//pass new ingredient to database to add it based on the user in the session
 	conn.Conn.InsertDataToIngredients(userID, userIngredient.Ingredient)
 	c.JSON(200, gin.H{
-		"code":    200,
 		"message": "Ingredient added",
 	})
 }
@@ -97,7 +95,6 @@ func (conn *Connection) GetUserData(c *gin.Context) {
 	var user models.User
 	user = conn.Conn.GetUserData(userID)
 	c.JSON(200, gin.H{
-		"code":      200,
 		"firstname": user.Firstname,
 		"lastname":  user.Lastname,
 		"email":     user.Email,
@@ -123,7 +120,6 @@ func (conn *Connection) RemoveIngredient(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Ingredient removed",
 			"data":    ingsRemoved,
-			"code":    200,
 		})
 	} else {
 		c.JSON(200, gin.H{
@@ -160,12 +156,21 @@ func (conn *Connection) SearchRecipes(c *gin.Context) {
 	}
 	recipes := recipe.GetRecipes()
 	ingredientCollectionList := conn.Conn.ListIngredients(userID)
-	var ingredList []string
-	for _, ing := range ingredientCollectionList {
-		fmt.Println(ing.Name)
-		ingredList = append(ingredList, ing.Name)
-	}
-	for _, recipe := range recipes.Recipes {
-		fmt.Println(recipe.Title)
-	}
+	//var ingredList []string
+	/*
+		for _, ing := range ingredientCollectionList {
+			fmt.Println(ing.Name)
+			ingredList = append(ingredList, ing.Name)
+		}
+		for _, recipe := range recipes.Recipes {
+			for _, r := range recipe.Ingredients {
+				fmt.Println(r.Ingredient)
+				fmt.Println(r.Weight)
+			}
+		}
+	*/
+	c.JSON(200, gin.H{
+		"ingredients": ingredientCollectionList,
+		"recipes":     recipes,
+	})
 }

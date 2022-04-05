@@ -37,7 +37,6 @@ function recipe() {
 	css_file = document.querySelector('head');
 	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	getRecipes();
-	alert("Recipe Homepage");
 }
 
 function logout() {
@@ -60,14 +59,26 @@ async function getRecipes() {
 			credentials: 'include'
 		};
 		let response = await fetch('http://localhost:8080/user/recipes/search', requestOption);
-		console.log(response);
+		//console.log(response);
 		let data = await response.json();
-		console.log(data);
+		//console.log(data);
+		if (response['status'] == 200) {
+			parseRecipes(data['recipes']['Recipes']);
+		}
 	} catch (error) {
 		console.log(error);
 	}
 }
 
+function parseRecipes(recipes) {
+	for (const r of recipes){
+		console.log(r.Title);
+		for (const i of r.Ingredients){
+			console.log(i.Ingredient);
+			console.log(i.Weight);
+		}
+	}
+}
 
 async function getUserData() {
 	try {

@@ -49,7 +49,6 @@ func GetRecipes() Recipes {
 	for _, hit := range r.Hits {
 		var rec Recipe
 		rec.Title = hit.Recipe.Label
-		//fmt.Println(rec.Title)
 		for _, f := range hit.Recipe.Ingredients {
 			var Ing Ingredient
 			Ing.Ingredient = f.Text
@@ -57,7 +56,6 @@ func GetRecipes() Recipes {
 			rec.Ingredients = append(rec.Ingredients, Ing)
 		}
 		rs.Recipes = append(rs.Recipes, rec)
-		//fmt.Println(rec.Ingredients)
 	}
 	return rs
 }
