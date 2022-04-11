@@ -63,11 +63,28 @@ async function getRecipes() {
 		let data = await response.json();
 		//console.log(data);
 		if (response['status'] == 200) {
-			parseRecipes(data['recipes']['Recipes']);
+			ul = document.createElement('ul');
+			ul.className = 'list-group';
+			ul.id = 'recipe-list-items';
+			document.getElementById('recipe-list').appendChild(ul);
+			let idx = 0;
+			for (const r of data['recipes']['Recipes']) {
+				createRecipeList(ul, r, idx);
+				idx += 1;
+			}
+			//parseRecipes(data['recipes']['Recipes']);
 		}
 	} catch (error) {
 		console.log(error);
 	}
+}
+
+function createRecipeList(ul, item, idx) {
+	let li  = document.createElement('li');
+	li.className ='list-group-item d-flex justify-content-between align-items-center';
+	li.id = 'list-group-item ' + idx;
+	ul.appendChild(li);
+	li.innerHTML += item.Title;
 }
 
 function parseRecipes(recipes) {
