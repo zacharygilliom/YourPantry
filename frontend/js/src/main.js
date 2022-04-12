@@ -34,6 +34,10 @@ function home() {
 }
 
 function recipe() {
+	let recipeSearchForm = document.getElementById('recipe-search-form');
+	recipeSearchForm.addEventListener('submit', function(event) {
+		recipeSearch(event);
+	});
 	css_file = document.querySelector('head');
 	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
 	getRecipes();
@@ -74,6 +78,14 @@ async function getRecipes() {
 			}
 			//parseRecipes(data['recipes']['Recipes']);
 		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function recipeSearch(event) {
+	try {
+		event.preventDefault();
 	} catch (error) {
 		console.log(error);
 	}

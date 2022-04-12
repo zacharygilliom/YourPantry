@@ -25,9 +25,29 @@
 		<div id='recipe-welcome'>
 			<div class='grid-container' id='recipe-data'>
 				<div id='recipe-search'>
-
+					<div id='recipe-search-header'>
+						<h3>
+							Here we will allow the user to enter an ingredient and we will search recipes containing this ingredient
+						</h3>
+						<form id='recipe-search-form'>
+							<div class='form-group row'>
+								<label for="ingredient-long-add-selection" class="col-sm-4 col-form-label">Ingredient Search</label>
+									<div class="col-sm-5">
+										<input id='ingredient-search' class="form-control" type="text" placeholder="Enter an Ingredient...">
+									</div>
+									<div class="col-sm-2">
+										<button type="submit" class="btn btn-custom">Search</button>
+									</div>
+							</div>
+						</form>
+					</div>
 				</div>
 				<div id='recipe-list'>
+					<div id='recipe-list-header'>
+						<h3>
+							This is the list of recipes that the user has currently saved
+						</h3>
+					</div>
 
 				</div>
 			</div>	
