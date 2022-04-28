@@ -1,8 +1,10 @@
 :root {
-	--ingredients-border-color: #F4F1DE;
+	--ingredients-border-color: #1A1F1D;
 	--ingredients-border-radius: 7px;
-	--ingredients-background-color: #313349;
-	--ingredients-text-color: #F4F1DE;
+	--ingredients-background-color: #D7C6AA;
+	--navbar-background-color: #1A1F1D;
+	--navbar-text-color: #D7C6AA;
+	--ingredients-text-color: #1A1F1D;
 	--ingredients-border-width: .5px;
 	--button-color: #81B29A;
 }
@@ -20,14 +22,14 @@ html * {
 }
 
 .navbar-custom {
-	background-color: var(--ingredients-background-color);
+	background-color: var(--navbar-background-color);
 }
 .navbar-brand {
-	color: var(--ingredients-text-color);
+	color: var(--navbar-text-color);
 	font-size: 36px;
 }
 .nav-link {
-	color: var(--ingredients-text-color);
+	color: var(--navbar-text-color);
 	font-size: 24px;
 }
 #ingredients-body {
@@ -108,14 +110,18 @@ html * {
 
 #home-body {
 	background-color: var(--ingredients-background-color);
-	color: var(--ingredients-text-color);
+	color: var(--navbar-background-color);
 }
 
 #user-welcome {
-	border:var(--ingredients-border-width) solid var(--ingredients-border-color);
-	border-radius:var(--ingredients-border-radius);
+	margin: auto;
+	text-align: center;
+	width:99%;
 }
 
+#background-image {
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,.2), 0 6px 20px 0 rgba(0, 0, 0, .19);
+}
 .btn-custom {
 	color: var(--ingredients-text-color);
 	background-color: var(--button-color);
