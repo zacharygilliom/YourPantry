@@ -108,16 +108,18 @@ html * {
 	margin-bottom: .25em;
 }
 
-#home-body {
-	background-color: var(--ingredients-background-color);
-	color: var(--navbar-background-color);
+#user-welcome {
 }
 
-#user-welcome {
-	margin: auto;
-	text-align: center;
-	width:99%;
+#home-body {
+	background: url('imgs/kitchen2.jpg');
+	background-size:cover;
+	background-position:center bottom;
+	background-repeat:no-repeat;
+	height:949px;
 }
+
+
 
 #background-image {
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,.2), 0 6px 20px 0 rgba(0, 0, 0, .19);

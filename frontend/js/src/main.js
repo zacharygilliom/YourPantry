@@ -12,8 +12,8 @@ function ingredients() {
 		let formName = 'long-add';
 		addIngredient(event, formName);
 	});
-	
 }
+
 function landing() {
 	css_file = document.querySelector('head');
 	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
