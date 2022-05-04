@@ -3,14 +3,14 @@
 	--ingredients-border-radius: 7px;
 	--ingredients-background-color: #D7C6AA;
 	--navbar-background-color: #1A1F1D;
-	--navbar-text-color: #D7C6AA;
+	--navbar-text-color: #ffffff;
 	--ingredients-text-color: #1A1F1D;
 	--ingredients-border-width: .5px;
 	--button-color: #81B29A;
 }
 
 html * {
-	font-family: Optima, sans-serif;
+	font-family: "Times New Roman", Times, serif;
 }
 
 .sign-up-login{
@@ -26,11 +26,11 @@ html * {
 }
 .navbar-brand {
 	color: var(--navbar-text-color);
-	font-size: 36px;
+	font-size: 56px;
 }
 .nav-link {
 	color: var(--navbar-text-color);
-	font-size: 24px;
+	font-size: 48px;
 }
 #ingredients-body {
 	background-color: var(--ingredients-background-color);
@@ -108,7 +108,15 @@ html * {
 	margin-bottom: .25em;
 }
 
-#user-welcome {
+#user-welcome h1 {
+	color: #ffffff;
+	text-align: center;
+	margin: auto;
+	margin-top:100px;
+	font-size: 10rem;
+	font-family: "Times New Roman", Times, serif;
+	text-shadow: 0 0 15px #000000;
+	text-decoration: underline;
 }
 
 #home-body {
