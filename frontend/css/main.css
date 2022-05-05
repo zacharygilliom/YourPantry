@@ -23,6 +23,8 @@ html * {
 
 .navbar-custom {
 	background-color: var(--navbar-background-color);
+	"background: rgb(26, 31,29);
+	background: linear-gradient(180deg, rgba(26, 31, 29,1) 0%, rgba(26, 31, 29, 1) 85%, rgba(83, 56, 36, 0) 100%);"
 }
 .navbar-brand {
 	color: var(--navbar-text-color);
@@ -115,7 +117,8 @@ html * {
 	margin-top:100px;
 	font-size: 10rem;
 	font-family: "Times New Roman", Times, serif;
-	text-shadow: 0 0 15px #000000;
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color:black;
 	text-decoration: underline;
 }
 
