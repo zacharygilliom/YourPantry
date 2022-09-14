@@ -16,25 +16,25 @@ const (
 	userkey = "user"
 )
 
-type User struct {
-	Username string
-}
-
-type userPOST struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type newUserPOST struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-}
-
-type userIngredient struct {
-	Ingredient string `json:"ingredient"`
-}
+//type User struct {
+//	Username string
+//}
+//
+//type userPOST struct {
+//	Email    string `json:"email"`
+//	Password string `json:"password"`
+//}
+//
+//type newUserPOST struct {
+//	Email     string `json:"email"`
+//	Password  string `json:"password"`
+//	Firstname string `json:"firstname"`
+//	Lastname  string `json:"lastname"`
+//}
+//
+//type userIngredient struct {
+//	Ingredient string `json:"ingredient"`
+//}
 
 func main() {
 	//Connect to database

@@ -18,9 +18,6 @@ type login struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
-type User struct {
-	Username string
-}
 
 var identityKey = "id"
 
@@ -55,10 +52,13 @@ func (conn *Connection) LoginUser(c *gin.Context) (interface{}, error) {
 	//set userID as the session "user" variable
 	userHex, _ := primitive.ObjectIDFromHex(users[0])
 	userID := userHex.Hex()
-	authUser := User{}
-	authUser.Username = userID
 	if userID == "" {
 		return nil, jwt.ErrFailedAuthentication
+	}
+	authUser := struct {
+		name string
+	}{
+		name: userID,
 	}
 	return authUser, nil
 }
