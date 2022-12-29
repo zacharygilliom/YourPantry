@@ -336,9 +336,13 @@ async function removeIngredient(event) {
 		};
 		let response = await fetch('http://localhost:8080/user/ingredients/remove', requestOption);
 		let data = await response.json();
-		if (data['code'] == 200) {
-			location.reload();
-		}
+		//location.reload();
+    fetchIngredList();
+    location.reload();
+//		if (data['code'] == 200) {
+//      fetchIngredList();
+//      location.reload();
+//		}
 	} catch (error) {
 		location.reload();
 		console.log(error);
