@@ -154,7 +154,11 @@ async function fetchIngredList() {
 			ul = document.createElement('ul');
 			ul.className = 'list-group';
 			ul.id = 'ingredient-list-items';
-			document.getElementById('ingredient-list').appendChild(ul);
+      parent = document.getElementById('ingredient-list');
+      while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+      }
+			parent.appendChild(ul);
 			let idx = 0;
 			data['ingredients'].forEach(function (item){
 				createIngredientList(ul, item, idx);
@@ -338,7 +342,7 @@ async function removeIngredient(event) {
 		let data = await response.json();
 		//location.reload();
     fetchIngredList();
-    location.reload();
+    //location.reload();
 //		if (data['code'] == 200) {
 //      fetchIngredList();
 //      location.reload();
