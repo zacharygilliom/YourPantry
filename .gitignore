@@ -13,9 +13,12 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-#
+
+# Custom files to ignore
 dbpassword.txt
 
 *.swp
 
 configs/
+
+*.ts
