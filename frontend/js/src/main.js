@@ -150,21 +150,21 @@ async function fetchIngredList() {
 		};
 		let response = await fetch('http://localhost:8080/user/ingredients/list', requestOption);
 		let data = await response.json();
+    ul = document.createElement('ul');
+    ul.className = 'list-group';
+    ul.id = 'ingredient-list-items';
+    parent = document.getElementById('ingredient-list');
+    while (parent.firstChild) {
+      parent.removeChild(parent.firstChild);
+    }
+    parent.appendChild(ul);
 		if (data['size'] > 0) {
-			ul = document.createElement('ul');
-			ul.className = 'list-group';
-			ul.id = 'ingredient-list-items';
-      parent = document.getElementById('ingredient-list');
-      while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-      }
-			parent.appendChild(ul);
 			let idx = 0;
 			data['ingredients'].forEach(function (item){
 				createIngredientList(ul, item, idx);
 				idx += 1;
 			})
-		} else if (data['size'] == 0) {
+		}else if (data['size'] == 0) {
 			item = document.getElementById('ingredient-list');
 			p = document.createElement('p');
 			p.innerHTML = "Nothing to show!";
@@ -312,9 +312,9 @@ async function addIngredient(event, form) {
 		let response = await fetch('http://localhost:8080/user/ingredients/add', requestOption);
 		let data = await response.json();
 		if (data['code'] != 200) {
-			location.reload();
+      fetchIngredList();
 		} else if (data['code'] == 200) {
-			location.reload();
+      fetchIngredList();
 		}
 	} catch (error) {
 		console.log(error);
@@ -348,7 +348,8 @@ async function removeIngredient(event) {
 //      location.reload();
 //		}
 	} catch (error) {
-		location.reload();
+    fetchIngredList();
+		//location.reload();
 		console.log(error);
 	}
 }
