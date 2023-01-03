@@ -1,7 +1,7 @@
 function ingredients() {
 	css_file = document.querySelector('head');
 	css_file.innerHTML += '<link rel="stylesheet" href="../css/main.css?v='+Math.random()+'">';
-	fetchIngredList();
+	fetchIngredientList();
 	let quickAddForm = document.getElementById('quick-add-form');
 	let longAddform = document.getElementById('long-add-form');
 	quickAddForm.addEventListener('submit', function(event) {
@@ -135,7 +135,7 @@ async function getUserData() {
 	}
 }
 
-async function fetchIngredList() {
+async function fetchIngredientList() {
 	try {
 		var token = getCookie("token");
 		const requestOption = {
@@ -220,7 +220,6 @@ async function signUpUser(event) {
 	};
 		let response = await fetch('http://localhost:8080/sign-up', requestOption);
 		let data = await response.json();
-		//console.log(data);
 		if (data["data"] == 1) {
 			window.location.replace("landing.html");
 			alert("New User Account has been created.  Please sign in Below!")
@@ -312,9 +311,9 @@ async function addIngredient(event, form) {
 		let response = await fetch('http://localhost:8080/user/ingredients/add', requestOption);
 		let data = await response.json();
 		if (data['code'] != 200) {
-      fetchIngredList();
+      fetchIngredientList();
 		} else if (data['code'] == 200) {
-      fetchIngredList();
+      fetchIngredientList();
 		}
 	} catch (error) {
 		console.log(error);
@@ -340,16 +339,14 @@ async function removeIngredient(event) {
 		};
 		let response = await fetch('http://localhost:8080/user/ingredients/remove', requestOption);
 		let data = await response.json();
-		//location.reload();
-    fetchIngredList();
+    fetchIngredientList();
     //location.reload();
 //		if (data['code'] == 200) {
-//      fetchIngredList();
+//      fetchIngredientList();
 //      location.reload();
 //		}
 	} catch (error) {
-    fetchIngredList();
-		//location.reload();
+    fetchIngredientList();
 		console.log(error);
 	}
 }
