@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// Connection is a middleman from the database connection type so that we can write the functions as methods
 type Connection struct {
 	Conn *database.Conn
 }
@@ -21,6 +22,7 @@ type login struct {
 
 var identityKey = "id"
 
+// SignUpUser the user returns the newly created userID
 func (conn *Connection) SignUpUser(c *gin.Context) {
 	newUser := models.NewUserPOST{}
 	err := c.BindJSON(&newUser)
@@ -33,6 +35,7 @@ func (conn *Connection) SignUpUser(c *gin.Context) {
 		"data": userID})
 }
 
+//LoginUser logs the user in and sets the jwt token as the userid for the current session
 func (conn *Connection) LoginUser(c *gin.Context) (interface{}, error) {
 	var loginVals login
 	if err := c.ShouldBind(&loginVals); err != nil {
@@ -63,6 +66,7 @@ func (conn *Connection) LoginUser(c *gin.Context) (interface{}, error) {
 	return authUser, nil
 }
 
+// AddIngredient takes the jwt session toek and then adds the user generated ingredient into that users data
 func (conn *Connection) AddIngredient(c *gin.Context) {
 	//get session and get user id variable
 	userIngredient := struct {
@@ -85,6 +89,8 @@ func (conn *Connection) AddIngredient(c *gin.Context) {
 		"message": "Ingredient added",
 	})
 }
+
+// GetUserData extracts the user's data given it exists for use on the account profile page
 func (conn *Connection) GetUserData(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	userHex := claims[identityKey]
@@ -101,6 +107,7 @@ func (conn *Connection) GetUserData(c *gin.Context) {
 	})
 }
 
+// RemoveIngredient gets jwt token from session and removes the chosen ingredient if it exists from the users pantry
 func (conn *Connection) RemoveIngredient(c *gin.Context) {
 	userIngredient := struct {
 		Ingredient string `json:"ingredient"`
@@ -129,6 +136,7 @@ func (conn *Connection) RemoveIngredient(c *gin.Context) {
 	}
 }
 
+// ListIngredients returns the list of user's ingredients
 func (conn *Connection) ListIngredients(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	userHex := claims[identityKey]
@@ -147,6 +155,7 @@ func (conn *Connection) ListIngredients(c *gin.Context) {
 	})
 }
 
+// SearchRecipes takes the ingredients from the users database and searches for ingredients that are compatible
 func (conn *Connection) SearchRecipes(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	userHex := claims[identityKey]
