@@ -1,7 +1,7 @@
 :root {
 	--ingredients-border-color: #1A1F1D;
 	--ingredients-border-radius: 7px;
-	--ingredients-background-color: #D7C6AA;
+  --ingredients-background-color: #F5F5F5;
 	--navbar-background-color: #1A1F1D;
 	--navbar-text-color: #ffffff;
 	--ingredients-text-color: #1A1F1D;
@@ -22,23 +22,24 @@ html * {
 }
 
 .navbar-custom {
-	background-color: var(--navbar-background-color);
-	"background: rgb(26, 31,29);
-	background: linear-gradient(180deg, rgba(26, 31, 29,1) 0%, rgba(26, 31, 29, 1) 85%, rgba(83, 56, 36, 0) 100%);"
+  background: var(--navbar-background-color);
 }
+
 .navbar-brand {
 	color: var(--navbar-text-color);
 	font-size: 56px;
 }
+
 .nav-link {
 	color: var(--navbar-text-color);
 	font-size: 48px;
 }
+
 #ingredients-body {
 	background-color: var(--ingredients-background-color);
 	color: var(--ingredients-text-color)
-
 }
+
 #ingredient-container {
 	margin: auto;
 	width: 99%;
@@ -89,10 +90,12 @@ html * {
 	text-align: center;
 	margin-bottom: .25em;
 }
+
 #ingredient-lister {
 	margin-left: .25em;
 	text-align:center;
 }
+
 .list-group-item {
 	background-color: var(--ingredients-background-color);
 	color: var(--ingredients-text-color);
@@ -131,15 +134,19 @@ html * {
 	background-position:bottom left;
 }
 
-
-
 #background-image {
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,.2), 0 6px 20px 0 rgba(0, 0, 0, .19);
 }
+
 .btn-custom {
 	color: var(--ingredients-text-color);
 	background-color: var(--button-color);
 	border-color: var(--button-color);
+}
+
+#recipe-body{
+	background-color: var(--ingredients-background-color);
+	color: var(--ingredients-text-color)
 }
 
 #recipe-list {
