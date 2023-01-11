@@ -48,7 +48,7 @@ html * {
 
 .grid-container {
 	display:grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: auto .40fr;
 	grid-gap: 2px;
 }
 

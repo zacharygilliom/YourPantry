@@ -292,6 +292,7 @@ async function addIngredient(event, form) {
 		} else if (form == 'long-add') {
 			ingredient = document.getElementById('long-add-ingredient-selection').value;
 			console.log(ingredient);
+      document.getElementById('long-add-ingredient-selection').value="";
 		} else {
 			ingredient = "";
 		}
